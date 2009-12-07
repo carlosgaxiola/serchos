@@ -11,6 +11,7 @@ class Inicio extends CI_Controller {
 		$this->load->helper("global_functions_helper");
 		$this->load->model("InicioModelo");
 		$this->modulo = $this->InicioModelo->buscar("modulos", $this->nombre, "nombre");
+		$this->form_validation->set_error_delimiters("", "");
 	}
 
 	public function index () {
@@ -33,13 +34,16 @@ class Inicio extends CI_Controller {
 	}
 
 	public function login () {
-		$this->form_validation->set_rules("txtUsuario", "Usuario", "required|trim");
-		$this->form_validation->set_rules("txtContra", "Contraseña", "required");
-		$this->form_validation->set_message("required", "El campo %s es obligatoro");
+		$post = $this->input->post();
+		$respuesta['code'] = 1;
+		$this->form_validation->set_rules("usuario", "usuario", "required|trim");
+		$this->form_validation->set_rules("contra", "contra", "required");
+		$this->form_validation->set_message("required", "r-{field}");
 		if ($this->form_validation->run()) {
-			$usuario = $this->InicioModelo->login($this->input->post("txtUsuario"), $this->input->post("txtContra"));
+			$usuario = $this->InicioModelo->login($post['usuario'], $post['contra']);
 			if (!$usuario) {
-				$this->session->set_flashdata("error", "El usuario y/o contraseña son incorrectos");
+				$respuesta['code'] = 0;
+				$respuesta['msg'] = "incorrecto";
 			}
 			else {
 				$extempo = array(
@@ -56,13 +60,18 @@ class Inicio extends CI_Controller {
 					'login' => true
 				);
 				$this->session->set_userdata(array('extempo' => $extempo));
+				$respuesta['msg'] = "correcto";
 			}
 		}
-		redirect(base_url());
+		else {
+			$respuesta['code'] = -1;
+			$respuesta['msg'] = form_error('usuario')."&".form_error('contra');
+		}
+		echo json_encode($respuesta);
 	}	
 
 	public function logout () {
 		$this->session->sess_destroy();
 		header("Location: ".base_url("inicio"));
-	}
+	}	
 }
