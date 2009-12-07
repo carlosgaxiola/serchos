@@ -9,7 +9,7 @@ class InicioModelo extends MY_Model {
 
 	public function login ($usuario, $contra) {		
 		$this->db->where("usuario", $usuario);
-		$this->db->where("contra", sha1($contra));
+		$this->db->where("contra", $contra);
 		$this->db->where("status", 1);		
 		$registro = $this->db->get("listar_usuarios");
 		if ($registro->num_rows() > 0)
