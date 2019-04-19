@@ -20,16 +20,16 @@ class Inicio extends CI_Controller {
 			'actual' => $this->modulo
 		);
 		if (isset($this->session->extempo) and $this->session->extempo['login']) {
-			$this->load->view("inicio/inicio_vista", $data);
+			$this->load->view("inicio/inicioVista", $data);
 		}
 		else {
 			$extempo = array(
-				'id_perfil' => 0,
+				'idPerfil' => 0,
 				'login' => false
 			);			
 			$data['titulo'] = "Login";
 			$this->session->set_userdata(array('extempo' => $extempo));
-			$this->load->view("inicio/login_vista", $data);
+			$this->load->view("inicio/loginVista", $data);
 		}
 	}
 
@@ -48,14 +48,14 @@ class Inicio extends CI_Controller {
 			else {
 				$extempo = array(
 					'nombre' => $usuario["nombre"],
-					'id_usuario' => $usuario["id"],
+					'idUsuario' => $usuario["id"],
 					'paterno' => $usuario['paterno'],
 					'materno' => $usuario['materno'],
 					'usuario' => $usuario['usuario'],
 					'contra' => $usuario['contra'],
-					'id_perfil' => $usuario['id_perfil'],
+					'idPerfil' => $usuario['id_perfil'],
 					'perfil' => $usuario['perfil'],					
-					'create_at' => $usuario['create_at'],
+					'createAt' => $usuario['create_at'],
 					'status' => $usuario['status'],
 					'login' => true
 				);
