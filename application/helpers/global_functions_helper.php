@@ -10,6 +10,15 @@ if (!function_exists("modulos")) {
 	}	
 }
 
+if (!function_exists("getModulo")) {
+    function getModulo ($nombreModulo) {
+        $that =& get_instance();
+        $that->load->model("ModulosModelo");
+        $modulo = $that->ModulosModelo->buscar(array("nombre" => $nombreModulo));
+        return $modulo;
+    }
+}
+
 if (!function_exists("menu")) {
 	function menu ($modulos, $idActual = 1) {    
 		if (is_array($modulos)) {
@@ -28,8 +37,8 @@ if (!function_exists("menu")) {
 	}
 }
 
-if (!function_exists("hasAccess"))  {
-    function hasAccess ($idPerfil, $idModulo) {        
+if (!function_exists("tieneAcceso"))  {
+    function tieneAcceso ($idPerfil, $idModulo) {        
         $that =& get_instance();
         $that->load->model("PerfilesModulosModelo");
         return $that->PerfilesModulosModelo->get($idPerfil, $idModulo);
