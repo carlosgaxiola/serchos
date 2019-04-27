@@ -1,9 +1,3 @@
-	<footer class="main-footer">
-	    <div class="pull-right hidden-xs">
-	      	<b>Version</b> 0.4
-	    </div>
-	    <strong>Copyright &copy; 2019 <a href="https://adminlte.io">Carlos Gaxiola</a>.</strong> All rights reserved.
-	</footer>
 	<!-- jQuery 3 -->
 	<script src="<?php echo base_url("assets/js/jquery-3.min.js") ?>"></script>		
 	<!-- Bootstrap 3.3.7 -->
@@ -19,11 +13,15 @@
 	<!-- DateTimePicker -->
 	<script src="<?php echo base_url("assets/js/bootstrap-datepicker.min.js") ?>"></script>
 	<!-- Validaciones -->
-	<script src="<?php echo base_url("assets/js/app/validaciones.js") ?>"></script>
+	<script src="<?php echo base_url("assets/js/validaciones.js") ?>"></script>
 	<!-- SHA1 -->
-	<script src="<?php echo base_url("assets/js/sha1.js") ?>"></script>
-	<!-- CryptoJS -->
-	<script src="<?php echo base_url("assets/js/crypto-js.js") ?>"></script>
+	<script src="<?php echo base_url("assets/js/sha1-jshash.js") ?>"></script>
+	<!-- NotifIt -->
+	<script src="<?php echo base_url("assets/js/notifIt.js") ?>"></script>
+	<!-- MomentJS -->
+	<script src="<?php echo base_url("assets/js/moment.js") ?>"></script>
+	<!-- JQueryTMPL -->
+	<script src="<?php echo base_url("assets/js/jquery.tmpl.min.js") ?>"></script>
 	<!-- Activar datatables -->
 	<script>			
 		var tabla = $(".datatable").DataTable({
@@ -53,7 +51,34 @@
 			return dia + "/" + mes + "/" + año				
 		}
 
-		$(document).ready( function () {				
+		function getFila (filas, id) {
+			for (let fila of filas.toArray())
+				if ($(fila).data("id") == id)
+					return fila
+		}
+
+		function validar (errorMessage) {
+			errors = errorMessage.split("&")
+			for (let error of errors) {
+				error = error.split("=")
+				if (error[1] == "")
+					$("#" + error[0])
+						.parent()
+						.removeClass("has-error")
+						.children(".error-box")
+							.text("")
+							.hide()
+				else
+					$("#" + error[0])
+						.parent()
+						.addClass("has-error")
+						.children(".error-box")
+							.text(error[1])
+							.show()
+			}
+		}		
+
+		$(document).ready( function () {
 			$(".sidebar-toggle").click (function () {
 				setTimeout(function () {
 					if ($("body").hasClass("sidebar-collapse"))
@@ -82,12 +107,21 @@
 				})
 			})
 		})
+
+		function errorDialog (msg = "Ocurrio un error desconocido", title = "Error") {
+			BootstrapDialog.alert({
+				title: "Error",
+				message: msg,
+				type: BootstrapDialog.TYPE_DANGER,
+				size: BootstrapDialog.SIZE_SMALL
+			})
+		}
 	</script>
 	<!-- App -->
 	<?php if (isset($scripts)): ?>
-		<?php if (is_array($scripts)): ?>			
-			<?php foreach ($scripts as $script): ?>					
-				<script src="<?php echo base_url($script) ?>"></script>					
+		<?php if (is_array($scripts)): ?>
+			<?php foreach ($scripts as $script): ?>
+				<script src="<?php echo base_url($script) ?>"></script>
 			<?php endforeach; ?>
 		<?php else: ?>
 			<script src="<?php echo base_url($scripts) ?>"></script>

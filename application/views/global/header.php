@@ -17,17 +17,10 @@
     <link rel="stylesheet" href="<?php echo base_url("assets/css/bootstrap-dialog.min.css") ?>">    
     <!-- Bootstrap 3.3.7 -->
     <link rel="stylesheet" href="<?php echo base_url("assets/css/bootstrap-3.min.css") ?>">
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-    <!-- Google Font -->
-    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic"> -->    
+    <!-- NotifIt -->
+    <link rel="stylesheet" href="<?php echo base_url("assets/css/notifIt.css") ?>">
     <!-- DatePicker -->
     <link rel="stylesheet" href="<?php echo base_url("assets/css/bootstrap-datepicker.min.css") ?>">
 </head>
-<body class="hold-transition skin-blue sidebar-mini">
+<body class="hold-transition skin-red-light sidebar-mini">
 <div class="wrapper">

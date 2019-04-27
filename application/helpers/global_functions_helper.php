@@ -2,10 +2,13 @@
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 if (!function_exists("modulos")) {
-	function modulos ($idPerfil) {
+	function modulos () {
 		$that =& get_instance();
-		$that->load->model("PerfilesModulosModelo");        
-		$modulos = $that->PerfilesModulosModelo->modulosPerfil($idPerfil);		
+        $that->load->model("PerfilesModulosModelo");        
+        $idPerfil = $that->session->extempo['idPerfil'];
+		$modulos = $that->PerfilesModulosModelo->modulosPadrePerfil($idPerfil);        
+        foreach ($modulos as &$modulo)
+            $modulo['hijos'] = $that->PerfilesModulosModelo->modulosHijo($modulo['id'], $idPerfil);
 		return $modulos;
 	}	
 }
@@ -20,33 +23,50 @@ if (!function_exists("getModulo")) {
 }
 
 if (!function_exists("menu")) {
-	function menu ($modulos, $idActual = 1) {    
-		if (is_array($modulos)) {
-		    foreach ($modulos as $modulo) {                                
-                echo "<li class='".(($modulo['id'] == $idActual)? "active": "")."'>";
-                echo "  <a href='".base_url($modulo['ruta'])."'>";
-                if (strcmp($modulo['fa_icon'], "0") == 0)
-                    echo "<i class='no-icon' style='display: none;'>".$modulo['nombre'][0]."</i>";
-                else                        
-                    echo "      <i class='".$modulo['fa_icon']."' ></i>";
-                echo "      <span>".$modulo['nombre']."</span>";
-                echo "  </a>";
-                echo "</li>";                
-            }
+	function menu ($modulos) {    
+		if (is_array($modulos)) {            
+		    foreach ($modulos as $modulo): ?> 
+                <?php if (isset($modulo['hijos']) and $modulo['hijos'] != false): ?>
+                    <li class="treeview <?php echo esPadreActual($modulo['id'])? 'active': '' ?>">
+                        <a href="#">
+                            <i class="<?php echo $modulo['icon'] ?>"></i>
+                            <span><?php echo $modulo['nombre'] ?></span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <?php menu($modulo['hijos']) ?>
+                        </ul>
+                    </li>
+                <?php else: ?>
+                    <li <?php echo esModuloActual($modulo['id'])? 'class="active"': '' ?>>
+                        <a href="<?php echo base_url($modulo['url']) ?>" class="link">
+                            <i class="<?php echo $modulo['icon'] ?>"></i>
+                            <span><?php echo $modulo['nombre'] ?></span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+            <?php endforeach;
         }
 	}
 }
 
-if (!function_exists("tieneAcceso"))  {
-    function tieneAcceso ($idPerfil, $idModulo) {        
+if (!function_exists("validarAcceso"))  {
+    function validarAcceso ($ajaxOnly = false) {        
         $that =& get_instance();
         $that->load->model("PerfilesModulosModelo");
-        return $that->PerfilesModulosModelo->get($idPerfil, $idModulo);
+        $idPerfil = $that->session->extempo['idPerfil'];
+        $idModulo = $that->modulo['id'];
+        $hasAccess = $that->PerfilesModulosModelo->get($idPerfil, $idModulo) != false;
+        if ($ajaxOnly)
+            $hasAccess &= $that->input->is_ajax_request();
+        return $hasAccess;
     }
 }
-if (!function_exists("encriptar_AES")) {    
-    function encriptar_AES($string, $key)
-    {
+
+if (!function_exists("encriptar_AES")) {
+    function encriptar_AES($string, $key) {
         $td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
         $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($td), MCRYPT_DEV_URANDOM );
         mcrypt_generic_init($td, $key, $iv);
@@ -57,9 +77,9 @@ if (!function_exists("encriptar_AES")) {
         return $encrypted_data_hex;
     }
 }
+
 if (!function_exists("desencriptar_AES")) {
-    function desencriptar_AES($encrypted_data_hex, $key)
-    {
+    function desencriptar_AES($encrypted_data_hex, $key) {
         $td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
         $iv_size_hex = mcrypt_enc_get_iv_size($td)*2;
         $iv = pack("H*", substr($encrypted_data_hex, 0, $iv_size_hex));
@@ -71,3 +91,46 @@ if (!function_exists("desencriptar_AES")) {
         return $decrypted;
     }
 } 
+
+if (!function_exists("getIdPerfil")) {
+    function getIdPerfil ($perfil) {
+        $that =& get_instance();
+        $that->load->model("PerfilesModelo");
+        $perfil = $that->PerfilesModelo->buscar(array("nombre" => $perfil));
+        if ($perfil)
+            return $perfil['id'];
+        return false;
+    }
+}
+
+if (!function_exists("getNombreCompleto")) {
+    function getNombreCompleto () {
+        $that =& get_instance();
+        $fullName = $that->session->extempo['nombre']." ". 
+            $that->session->extempo['paterno']." ".
+            $that->session->extempo['materno'];
+        return $fullName;
+    }
+}
+
+if (!function_exists("esPadreActual")) {
+    function esPadreActual ($idModuloPadre) { 
+        $that =& get_instance();
+        $that->load->model("ModulosModelo");
+        $url = uri_string();        
+        $url = explode("/", $url);        
+        $urlModulo = $that->ModulosModelo->buscar(array("url" => $url[0]));        
+        return ($idModuloPadre == $urlModulo['id_padre']);
+    }
+}
+
+if (!function_exists("esModuloActual")) {
+    function esModuloActual ($idModulo) {
+        $that =& get_instance();
+        $that->load->model("ModulosModelo");
+        $url = uri_string();
+        $url = explode("/", $url);
+        $urlModulo = $that->ModulosModelo->buscar(array("url" => $url[0]));
+        return ($idModulo == $urlModulo['id']);
+    }
+}

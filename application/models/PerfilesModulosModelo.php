@@ -8,7 +8,7 @@ class PerfilesModulosModelo extends CI_Model {
 	private $perfiles = "perfiles";	
 
 	public function __construct () {
-		parent::__construct();		
+		parent::__construct();
 	}
 
 	public function modulosPerfil ($idPerfil) {
@@ -19,6 +19,14 @@ class PerfilesModulosModelo extends CI_Model {
 		$modulos = $this->db->get($this->modulos." mods");
 		if ($modulos->num_rows() > 0)
 			return $modulos->result_array();
+		return false;
+	}
+
+	public function modulosPadrePerfil ($idPerfil) {
+		$this->db->where("id_perfil", $idPerfil);
+		$result = $this->db->get("modulos_padre");
+		if ($result->num_rows() > 0)
+			return $result->result_array();
 		return false;
 	}
 
@@ -43,6 +51,17 @@ class PerfilesModulosModelo extends CI_Model {
 		$reg = $this->db->get($this->union);
 		if ($reg->num_rows() > 0)
 			return  $reg->row_array();
+		return false;
+	}
+
+	public function modulosHijo ($idPadre, $idPerfil) {
+		$this->db->where("id_padre", $idPadre);
+		$this->db->where("id_perfil", $idPerfil);
+		$this->db->join($this->union." pm", "pm.id_modulo = mods.id");
+		$this->db->group_by("mods.id");
+		$modulos = $this->db->get("modulos mods");
+		if ($modulos->num_rows() > 0)
+			return $modulos->result_array();
 		return false;
 	}
 }

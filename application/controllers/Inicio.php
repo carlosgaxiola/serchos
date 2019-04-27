@@ -3,13 +3,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Inicio extends CI_Controller {
 
-	private $modulo;
-	private $nombre = "Inicio";
+	public $modulo;
+	public $nombre = "Inicio";
 
 	public function __construct () {
 		parent::__construct();
 		$this->load->helper("global_functions_helper");
 		$this->load->model("InicioModelo");
+		$this->load->model("UsuariosModelo");
 		$this->modulo = $this->InicioModelo->buscar("modulos", $this->nombre, "nombre");
 		$this->form_validation->set_error_delimiters("", "");
 	}
@@ -20,7 +21,17 @@ class Inicio extends CI_Controller {
 			'actual' => $this->modulo
 		);
 		if (isset($this->session->extempo) and $this->session->extempo['login']) {
-			$this->load->view("inicio/inicioVista", $data);
+			switch ($this->session->extempo['perfil']) {
+				case "Mesero":
+				case "Cocina":
+				case "Caja":
+					redirect(base_url("comandas"));
+					break;
+				case "Administrador":
+				case "Gerente":
+					$this->load->view("inicio/inicioVista", $data);
+					break;
+			}
 		}
 		else {
 			$extempo = array(
@@ -73,5 +84,63 @@ class Inicio extends CI_Controller {
 	public function logout () {
 		$this->session->sess_destroy();
 		header("Location: ".base_url("inicio"));
-	}	
+	}
+
+	public function registro () {
+		if (isset($this->session->extempo['login'])) {
+			$data = array(
+				'titulo' => "Registro"
+			);
+			$this->load->view("inicio/registroVista", $data);
+		}
+		else
+			redirect(base_url());
+	}
+
+	public function registrarse () {
+		if ($this->input->is_ajax_request()) {
+			$post = $this->input->post();
+			$this->form_validation->set_rules("txtNombre", "Nombre(s)", "trim|required|max_length[45]");
+			$this->form_validation->set_rules("txtPaterno", "Apellido Paterno", "trim|required|max_length[45]");
+			$this->form_validation->set_rules("txtMaterno", "Apellido Materno", "trim|required|max_length[45]");
+			$this->form_validation->set_rules("txtUsuario", "Usuario", "trim|required|is_unique[usuarios.usuario]|max_length[45]");
+			$this->form_validation->set_rules("txtContra", "Contraseña", "trim|required");
+			$this->form_validation->set_rules("txtConfContra", "Repetir Contraseña", "trim|required|matches[txtContra]");
+			$this->form_validation->set_message("required", "El campo {field} es obligatorio");
+			$this->form_validation->set_message("is_unique", "El {field} ya existe");
+			$this->form_validation->set_message("matches", "Las contraseñas deben coincidir");
+			$this->form_validation->set_message("max_length", "Máximo {param} caracteres");
+			if ($this->form_validation->run()) {
+				$fecha = DateTime::createFromFormat("d/m/Y", $post['fecha']);
+				$usuario = array(
+					'nombre' => $post['txtNombre'],
+					'paterno' => $post['txtPaterno'],
+					'materno' => $post['txtMaterno'],
+					'usuario' => $post['txtUsuario'],
+					'contra' => $post['txtContra'],
+					'create_at' => $fecha->format("Y-m-d"),
+					'id_perfil' => getIdPerfil("Cliente"),
+					'status' => 1 //Status cliente activo
+				);
+				$idUsuario = $this->UsuariosModelo->insertar($usuario);
+				if ($idUsuario)
+					echo json_encode( array( 'code' => 1, 'msg' => $idUsuario ) );
+				else
+					echo json_encode( array( 'code' => -1, 'msg' => 'No se pudo registrar el usuario') );
+			}
+			else {
+				echo json_encode(array('code' => 0, 
+					'msg' => 
+						"txtNombre=".form_error("txtNombre")."&".
+						"txtUsuario=".form_error("txtUsuario")."&".
+						"txtPaterno=".form_error("txtPaterno")."&".
+						"txtMaterno=".form_error("txtMaterno")."&".
+						"txtContra=".form_error("txtContra")."&".
+						"txtConfContra=".form_error("txtConfContra")
+				));
+			}
+		}
+		else
+			show_404();
+	}
 }

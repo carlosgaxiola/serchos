@@ -5,6 +5,8 @@ class InicioModelo extends MY_Model {
 
 	public function __construct () {
 		parent::__construct();
+		$this->tabla = "usuarios";
+		$this->view = "usuarios";
 	}
 
 	public function login ($usuario, $contra) {		
