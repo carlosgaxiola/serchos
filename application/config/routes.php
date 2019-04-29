@@ -59,3 +59,4 @@ $route['cocineros'] = "usuarios/index/cocineros";
 $route['cajeros'] = "usuarios/index/cajeros";
 $route['recepcionistas'] = "usuarios/index/recepcionistas";
 $route['clientes'] = "usuarios/index/clientes";
+$route['historial/platillos'] = "reportes/historiales/platillos";

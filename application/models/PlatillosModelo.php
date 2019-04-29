@@ -17,9 +17,9 @@ class PlatillosModelo extends MY_Model {
     }
 
     public function like ($nombrePlatillo = '') {
+        $this->db->where("status", 1);
         if (!empty($nombrePlatillo)) {
             $this->db->like("nombre", $nombrePlatillo);
-            $this->db->where("status", 1);
         }
         $platillos = $this->db->get("platillos");
         if ($platillos->num_rows() > 0)

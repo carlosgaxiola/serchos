@@ -39,6 +39,27 @@
 	    </div>
     </div>
 </script>
+<script type="text/x-jQuery-tmpl" id="platillo-tmpl">
+	<div class="container-fluid">
+		<form id="frm-platillo">
+			<div class="form-group col-sm-3">
+				<label for="txtPlatillo">Platillo</label>
+				<input type="text" id="txtPlatillo" onchange="sugerirPrecio(this.value)" onkeyup="buscarPlatillo(this.value)" class="form-control" list="platillos" name="txtPlatillo">
+				<small class="help-block error-box" style="display: none;"></small>
+			</div>
+			<div class="form-group col-sm-3">
+				<label for="txtCantidad">Cantidad</label>
+				<input type="text" id="txtCantidad" class="form-control" name="txtCantidad">
+				<small class="help-block error-box" style="display: none;"></small>
+			</div>
+			<div class="form-group col-sm-3">
+				<label for="txtPrecio">Precio</label>
+				<input type="text" id="txtPrecio" class="form-control" name="txtPrecio">
+				<small class="help-block error-box" style="display: none;"></small>
+			</div>
+		</form>
+	</div>
+</script>
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-sm-6" id="lista">

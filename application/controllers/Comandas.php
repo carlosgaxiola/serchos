@@ -110,30 +110,84 @@ class Comandas extends MY_Controller {
 			show_404();
 	}
 
-	private function formValidation () {
-		$this->form_validation->set_rules("observaciones", "Observaciones", "required");
-		$this->form_validation->set_rules("observaciones", "Observaciones", "required");
-		$this->form_validation->set_rules("observaciones", "Observaciones", "required");
-		$this->form_validation->set_rules("observaciones", "Observaciones", "required");
+	private function formValidation ($esPlatillo = false) {
+		if ($esPlatillo) {
+			$this->form_validation->set_rules("platillo", "Platillo", "required");
+			$this->form_validation->set_rules("cantidad", "Cantidad", "required|numeric");
+			$this->form_validation->set_rules("precio", "Precio", "required|numeric");
+			$this->form_validation->set_message("numeric", "El campo {field} debe ser solo números");
+		}
+		else {
+			$this->form_validation->set_rules("observaciones", "Observaciones", "required");
+		}
 		$this->form_validation->set_message("required", "El campo {field} es obligatorio");
 		return $this->form_validation->run();
 	}
 
-	private function getFormErrors () {
-		return "observaciones=".form_error("observaciones");
+	private function getFormErrors ($esPlatillo = false) {
+		if ($esPlatillo) {
+			return "txtPlatillo=".form_error("platillo")."&".
+				"txtCantidad=".form_error("cantidad")."&".
+				"txtPrecio=".form_error("precio");
+		}
+		else
+			return "observaciones=".form_error("observaciones");
 	}
 
 	public function platillos () {
-        if (validarAcceso(true))
-            echo json_encode($this->PlatillosModelo->listar());
+        if (validarAcceso(true)) {
+        	$where = array("status" => 1);
+            echo json_encode($this->PlatillosModelo->listar($where));
+        }
         else
             show_404();
     }
 
     public function buscar ($nombrePlatillo = '') {
-        if (validarAcceso(true))
+        if (validarAcceso(true)) {
+        	$nombrePlatillo = implode(" ", explode("%20", $nombrePlatillo));
             echo json_encode($this->PlatillosModelo->like($nombrePlatillo));
+        }
         else
             show_404();
+    }
+
+    public function addDetalle () {
+    	if (validarAcceso(true)) {
+    		$post = $this->input->post();
+    		$res = array();
+    		if ($this->formValidation(true)) {
+    			$platillo = $this->PlatillosModelo->buscar(array("nombre" => $post['platillo']));
+    			if (!$platillo) {
+    				$res['code'] = 0;
+    				$res['msg'] = "txtPlatillo=El platillo ingresado no existe&txtCantidad=&txtPrecio=";
+    			}
+    			else {
+    				$detalle = array(
+    					'id_comanda' => $post['idComanda'],
+    					'id_platillo' => $platillo['id'],
+    					'cantidad' => $post['cantidad'],
+    					'precio' => $post['precio']
+    				);
+    				$this->ComandasDetalleModelo->trans_start();
+    				$this->ComandasDetalleModelo->insertar($detalle);
+    				if ($this->ComandasDetalleModelo->trans_end()) {
+    					$res['code'] = 1;
+    					$res['msg'] = $this->ComandasModelo->getTotal($post['idComanda']);
+    				}
+    				else {
+    					$res['code'] = -1;
+    					$res['msg'] = "No se pudo agregar el platillo";
+    				}
+    			}
+    		}
+    		else {
+    			$res['code'] = 0;
+    			$res['msg'] = $this->getFormErrors(true);
+    		}
+    		echo json_encode($res);
+    	}
+    	else
+    		show_404();
     }
 }

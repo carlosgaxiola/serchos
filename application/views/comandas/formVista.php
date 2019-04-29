@@ -1,12 +1,4 @@
-<div class="row">
-	<div class="col-xs-3">
-		<h3 id="form-title"></h3>
-	</div>
-	<div class="col-xs-3 col-xs-offset-6">
-		<button class="btn btn-danger pull-right" id="btn-table"><i class="fas fa-times"></i></button>
-	</div>
-</div>
-<form id="frm-mesa">
+<form id="frm-platillo">
 	
 	<div class="row">
 		<div class="form-group col-sm-4">

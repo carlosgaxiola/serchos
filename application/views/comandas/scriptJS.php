@@ -1,9 +1,46 @@
 <script>
 	Array.prototype.remove = function (element) {
-	    var index = this.indexOf(element);
-	    if (index > -1)
-	    	this.splice(index, 1);		    
+		if (typeof element == "object") {
+			let index = this.indexOf(element)
+			    if (index > -1)
+			    	this.splice(index, 1)
+		}
 	}
+
+	function buscarPlatillo ( nombre = '' ) {
+		$.ajax({
+			url: "comandas/buscar/" + nombre,
+			success: function ( res ) {
+				try {
+					res = JSON.parse(res)
+					if ( res ) {
+						$("#platillos").html("");
+						$.each(res, function (index, platillo) {
+							$("#platillos")
+								.append($("<option></option>")
+									.val(platillo.nombre)
+									.data("id-platillo", platillo.id)
+									.data("precio", platillo.precio)
+								)
+						})
+					}
+					else {
+						$("#txtPrecio").siblings("small").hide()
+					}
+				}
+				catch ( e ) {
+					console.error(e)
+				}
+			}
+		})
+	}
+
+	function sugerirPrecio (platillo) {
+		let precio = $("#platillos option[value='" + platillo + "']").data("precio");
+		if (precio)
+			$("#txtPrecio").siblings("small").show().html("Sugerido: <strong>" + precio + "</strong>")
+	}
+
 	$(document).ready( function () {
 		var platillos = [],
 			comandasBgs = [
@@ -21,40 +58,37 @@
 			comandasList = {nuevas: [], atendidas: [], pagadas: [], rechazadas: []},
 			trNoDetalle = '<tr><td colspan="4" class="text-muted text-center"><h4>Selecciona una comanda</h4></td></tr>';
 		<?php if ($this->session->extempo['idPerfil'] == getIdPerfil("Caja")): ?>
-			let actionBnts = {
-				0: "<button type='button' id='btn-pagar' class='btn btn-success'>Pagar</button>"
-			};
+			let actionBnts = [
+				"<button disabled='true' type='button' id='btn-pagar' class='btn btn-success'>Pagar</button>",
+				"<button disabled='true' type='button' id='btn-limpiar' data-type='clean' class='btn btn-defualt'>Limpiar</button>"
+			];
 		<?php elseif ($this->session->extempo['idPerfil'] == getIdPerfil("Cocina")): ?>
-			let actionBnts = {
-				0: "<button type='button' id='btn-antender' class='btn btn-primary'>Atender</button>"
-			};
+			let actionBnts = [
+				"<button disabled='true' type='button' id='btn-antender' class='btn btn-primary'>Atender</button>",
+				"<button disabled='true' type='button' id='btn-limpiar' data-type='clean' class='btn btn-default'>Limpiar</button>"
+			];
 		<?php elseif ($this->session->extempo['idPerfil'] == getIdPerfil("Administrador")): ?>
-			let actionBnts =  {
-				0: "<button type='button' id='btn-pagar' class='btn btn-success'>Pagar</button>",
-				1: "<button type='button' id='btn-antender' class='btn btn-primary'>Atender</button>",
-				2: "<button type='button' id='btn-rechazar' class='btn btn-danger'>Rechazar</button>",
-				3: "<button type='button' data-type='edit' id='btn-editar-comanda' class='btn btn-warning'>Editar</button>"
-			}
+			let actionBnts = [
+				"<button disabled='true' type='button' id='btn-pagar' class='btn btn-success'>Pagar</button>",
+				"<button disabled='true' type='button' id='btn-antender' class='btn btn-primary'>Atender</button>",
+				"<button disabled='true' type='button' id='btn-rechazar' class='btn btn-danger'>Rechazar</button>",
+				"<button disabled='true' type='button' data-type='edit' id='btn-editar-comanda' class='btn btn-warning'>Editar</button>",
+				"<button disabled='true' type='button' id='btn-add-platillo' class='btn btn-success'>Añadir Platillo</button>",
+				"<button disabled='true' type='button' id='btn-limpiar' data-type='clean' class='btn btn-default'>Limpiar</button>"
+			];
 		<?php elseif ($this->session->extempo['idPerfil'] == getIdPerfil("Gerente")): ?>
-			let actionBnts = {
-				0: "<button type='button' id='btn-pagar' class='btn btn-success'>Pagar</button>",
-				1: "<button type='button' id='btn-rechazar' class='btn btn-danger'>Rechazar</button>",
-				2: "<button type='button' data-type='edit' id='btn-editar-comanda' class='btn btn-warning'>Editar</button>"
-			}
+			let actionBnts = [
+				"<button disabled='true' type='button' id='btn-pagar' class='btn btn-success'>Pagar</button>",
+				"<button disabled='true' type='button' id='btn-rechazar' class='btn btn-danger'>Rechazar</button>",
+				"<button disabled='true' type='button' data-type='edit' id='btn-editar-comanda' class='btn btn-warning'>Editar</button>",
+				"<button disabled='true' type='button' id='btn-add-platillo' class='btn btn-success'>Añadir Platillo</button>",
+				"<button disabled='true' type='button' id='btn-limpiar' data-type='clean' class='btn btn-defualt'>Limpiar</button>"
+			];
 		<?php endif; ?>
 		$("#tbl-detalle tbody").html(trNoDetalle)
 		
-		$("#btn-save").click( function () {
-			if ($("#idMesa").val() == "")
-				add()
-			else
-				edit()
-		})
-		
 		for (let index in actionBnts)
-			$("#default-buttons .form-group").append(actionBnts[index] + "&nbsp;")
-
-		function platillo ( e ) { buscarPlatillo($(this).val()) }
+			$("#default-buttons .form-group").append(!isNaN(index)?actionBnts[index] + "&nbsp;":'')
 
 		function setDetalles (comanda) {
 			if (comanda && comanda.detalles) {
@@ -72,10 +106,12 @@
 				$("#hora-comanda").text(comanda.hora)
 				$("#total-comanda").text(comanda.total)
 				$("#observaciones").text(comanda.observaciones)
-				$("#btn-antender").prop("disabled", comanda.status == 2)
+				$("#btn-antender").prop("disabled", comanda.status != 1)
 				$("#btn-pagar").prop("disabled", comanda.status != 2)
-				$("#btn-rechazar").prop("disabled", comanda.status == 0 || comanda.status == 2)
+				$("#btn-rechazar").prop("disabled", comanda.status != 1)
+				$("#btn-add-platillo").prop("disabled", comanda.status == 3 || comanda.status == 0)
 				$("#btn-editar-comanda").prop("disabled", comanda.status == 3 || comanda.status == 0)
+				$("#btn-limpiar").prop("disabled", false)
 				$("#tabla-detalle-comanda").data("comanda", comanda)
 			}
 			else
@@ -87,15 +123,19 @@
 			if (comanda) {
 				if ($(this).data("type") == "edit") {
 					$(this).text("Guardar")
+					$("#btn-limpiar").text("Cancelar").data("type", "cancel")
 					$(this).data("type", "save")
 					let celdas = $("#tbl-detalle tbody tr td").toArray();
 					let contadorColumnas = 0;
 					for (let index in celdas) {
 						let text = $(celdas[index]).text()
 						if ((index % 4) == 0)
-							$(celdas[index]).html("<input type='text' list='platillos' class='form-control' value='" + text + "' >")
+							$(celdas[index]).html("<input type='text' onkeyup='buscarPlatillo(this.value)' list='platillos' class='form-control' value='" + text + "' >")
 						else if (contadorColumnas != 3) {
 							$(celdas[index]).html("<input type='text' class='form-control' value='" + text + "' style='text-align: right;'>")
+						}
+						else if (contadorColumnas == 3) {
+							$(celdas[index]).html("<button class='btn btn-danger btn-del-platillo' title='Eliminar platillo' type='button'><i class='fas fa-times'></i></button>")
 						}
 						contadorColumnas++;
 						if (contadorColumnas == 4)
@@ -130,10 +170,11 @@
 						$("#tbl-detalle tbody").prop("contenteditable", false)
 						$(this).text("Editar")
 						$(this).data("type", "edit")
-						let filas = $("#tbl-detalle tbody tr").toArray(), total = 0;
-						for (let index in filas)
-							total += parseInt(detalles[index].cantidad) * parseInt(detalles[index].precio)
-
+						$("#btn-limpiar").text("Limpiar").data("type", "clean")
+						let total = 0;
+						for (let index in detalles)
+							if (!isNaN(index))
+								total += parseInt(detalles[index].cantidad) * parseInt(detalles[index].precio)
 						$observaciones = $("#tabla-detalle-comanda #observaciones");
 						
 						nuevaComanda = {
@@ -163,12 +204,13 @@
 											size: BootstrapDialog.SIZE_SMALL
 										})
 										setDetalles(nuevaComanda)
-										actualizarComandaLista(nuevaComanda)
+										delComanadList(nuevaComanda)
+										addComandaList(nuevaComanda)
 									}
 									else if (res.code == 0) {
 										errorDialog(res.msg)
 									}
-									else  if (res.code == -1) {
+									else if (res.code == -1) {
 										errorDialog(res.msg)	
 										setDetalles(comanda)
 									}
@@ -310,9 +352,104 @@
 			}
 		})
 
-		$("#tbl-detalle").delegate(".platillos", "keyup", function ( e ) {
-			let val = $(this).val()
-			buscarPlatillo(nombre)
+		$("#btn-add-platillo").click( function () {
+			let comanda = $("#tabla-detalle-comanda").data("comanda")
+			if (comanda) {
+				BootstrapDialog.show({
+					title: "Agregar platillo",
+					message: function (dialog) {
+						return $("#platillo-tmpl").tmpl()
+					},
+					buttons: [
+						{
+							label: "Agregar",
+							cssClass: "btn-primary",
+							action: function ( dialog ) {
+								platillo = {
+									idComanda: comanda.id,
+									platillo: $("#txtPlatillo").val(),
+									precio: $("#txtPrecio").val(),
+									cantidad: $("#txtCantidad").val()
+								}
+								$.ajax({
+									url: base_url + "comandas/addDetalle",
+									type: "POST",
+									data: platillo,
+									success: function ( res ) {
+										try {
+											res = JSON.parse(res)
+											if (res.code == 1) {
+												comanda.detalles.push(platillo)
+												dialog.close()
+												comanda.total = res.msg
+												setDetalles(comanda)
+											}
+											else if (res.code == 0) {
+												validar(res.msg)
+											}
+											else if (res.code < 0) {
+												errorDialog(res.msg)
+											}
+										}
+										catch ( e ) { console.error(e) }
+									}
+								})
+							}
+						},
+						{
+							label: "Cancelar",
+							cssClass: "btn-danger",
+							action: function ( dialog ) { dialog.close() }
+						}
+					]
+				})
+			}
+			else
+				errorDialog("Selecciona un comanda")
+		})
+
+		$("#btn-limpiar").click( function () {
+			if ($(this).data("type") == "clean") {
+				$("#tbl-detalle tbody").empty()
+				$("#fecha-comanda").text("")
+				$("#hora-comanda").text("")
+				$("#total-comanda").text("")
+				$("#observaciones").text("")
+				$.each($(".btn"), function (i, e) { $(e).prop("disabled", true) })
+			}
+			else if ($(this).data("type") == "cancel") {
+				let comandaActual = $("#tabla-detalle-comanda").data("comanda")
+				if (comandaActual) {
+					let comandas = $("#" +  comandasGroups[comandaActual.status] + " .comanda").toArray();
+					for (let index in comandas) {
+						let infoBox = $(comandas[index])
+						if (infoBox.data("id") == comandaActual.id) {
+							setDetalles(infoBox.data("comanda"))
+							$("#btn-editar-comanda").text("Editar").data("type", "save")
+							$(this).text("Limpiar").data("type", "clean")
+							break
+						}
+					}
+				}
+				else
+					errorDialog("Error, comanda no válida")
+			}
+		})
+
+		$("#tbl-detalle").delegate(".btn-del-platillo", "click", function () {
+			let $tr = $(this).parent().parent(), platillo = $("td:eq(0)", $tr).text();
+			BootstrapDialog.confirm({
+				title: "Quitar platillo",
+				message: "¿Quitar platillo <strong>" + platillo + "</strong> de la comanda?",
+				type: BootstrapDialog.TYPE_WARNING,
+				btnOKLabel: "Sí",
+				btnOKClass: "btn-danger",
+				btnCancelLabel: "No",
+				callback: function ( res ) {
+					if (res)
+						$tr.remove()
+				}
+			})
 		})
 
 		function validarDetalles (detalles) {
@@ -350,30 +487,6 @@
 			else
 				errorDialog("Detalles no válidos")
 		}
-
-		function buscarPlatillo ( nombre = '' ) {
-			$.ajax({
-				url: "comandas/buscar/" + nombre,
-				success: function ( res ) {
-					try {
-						res = JSON.parse(res)
-						if ( res ) {
-							$("#platillos").html("");
-							$.each(res, function (index, platillo) {
-								$("#platillos")
-									.append($("<option></option>")
-										.val(platillo.nombre)
-										.data("id-platillo", platillo.id)
-									)
-							})
-						}
-					}
-					catch ( e ) {
-						console.error(e)
-					}
-				}
-			})
-		}		
 
 		function getPlatillos () {
 			$.ajax({
@@ -456,17 +569,18 @@
 						let comanda = comandas[index]
 						if (comandasList[comandasGroups[comanda.status]].indexOf(comanda.id) == -1) {
 							addComandaList(comanda)
-							if (comanda.status == 0) {
-								comanda.status = 3;
-								delComanadList(comanda)
+							copiaComanda = $.extend({}, comanda)
+							if (copiaComanda.status == 0) {
+								copiaComanda.status = 3;
+								delComanadList(copiaComanda)
 							}
-							if (comanda.status == 3) {
-								comanda.status = 2;
-								delComanadList(comanda)
+							if (copiaComanda.status == 3) {
+								copiaComanda.status = 2;
+								delComanadList(copiaComanda)
 							}
-							if (comanda.status == 2) {
-								comanda.status = 1;
-								delComanadList(comanda)
+							if (copiaComanda.status == 2) {
+								copiaComanda.status = 1;
+								delComanadList(copiaComanda)
 							}
 						}
 					}
