@@ -1,7 +1,7 @@
 <header class="main-header">
     <a href="<?php echo base_url() ?>" class="logo">
-        <span class="logo-mini"><b>EXT</b></span>
-        <span class="logo-lg"><b>Extemporaneo</b></span>
+        <span class="logo-mini"><b>PCB</b></span>
+        <span class="logo-lg"><b>Pacheco's bar</b></span>
     </a>
     <nav class="navbar navbar-static-top">
         <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">

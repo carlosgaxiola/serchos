@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo "Restaurante | ".$titulo ?></title>  
+    <title><?php echo "Pacheco's | ".$titulo ?></title>  
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="<?php echo base_url("assets/css/fontawesome.package.min.css") ?>">  
@@ -19,7 +19,7 @@
 	<main class="content-wrapper" style="min-height: 100%">
 		<section class="content">
 			<div class="login-box" style="margin-top: 0px; margin-bottom: 0px;">
-			  	<h1>Restaurante Extempo</h1>
+			  	<h1 style="text-align: center;">Pacheco's bar</h1>
 			  	<div class="login-box-body">
 			    	<p class="login-box-msg">Iniciar Sesión</p>
 					<div class="alert alert-danger" hidden>
