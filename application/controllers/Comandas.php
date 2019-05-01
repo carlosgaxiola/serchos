@@ -118,7 +118,8 @@ class Comandas extends MY_Controller {
 			$this->form_validation->set_message("numeric", "El campo {field} debe ser solo números");
 		}
 		else {
-			$this->form_validation->set_rules("observaciones", "Observaciones", "required");
+			$this->form_validation->set_rules("observaciones", "Observaciones", "required|max_length[255]");
+			$this->form_validation->set_message("max_length", "El campo {field} debe tener un máximo de {param} caracteres");
 		}
 		$this->form_validation->set_message("required", "El campo {field} es obligatorio");
 		return $this->form_validation->run();
