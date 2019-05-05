@@ -70,7 +70,6 @@
 		<!-- Registro JS -->
 		<script>
 			
-
 	        $("#btn-registro").click( function () {
 	        	let contra = $("#txtContra").val(),
 	        		contraSha1 = contra != ""? hex_sha1(contra): "",
