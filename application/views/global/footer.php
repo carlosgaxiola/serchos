@@ -16,12 +16,12 @@
 	<script src="<?php echo base_url("assets/js/validaciones.js") ?>"></script>
 	<!-- SHA1 -->
 	<script src="<?php echo base_url("assets/js/sha1-jshash.js") ?>"></script>
-	<!-- NotifIt -->
-	<script src="<?php echo base_url("assets/js/notifIt.js") ?>"></script>
 	<!-- MomentJS -->
 	<script src="<?php echo base_url("assets/js/moment.js") ?>"></script>
 	<!-- JQueryTMPL -->
 	<script src="<?php echo base_url("assets/js/jquery.tmpl.min.js") ?>"></script>
+	<!-- TimePicker -->
+	<script src="<?php echo base_url("assets/js/bootstrap-timepicker.min.js") ?>"></script>
 	<!-- Activar datatables -->
 	<script>			
 		var tabla = $(".datatable").DataTable({
@@ -39,8 +39,8 @@
 		    }			     	
 		})
 		
-		var base_url = '<?php echo base_url() ?>'
-		
+		var base_url = '<?php echo base_url("index.php/") ?>'
+
 		function getDate () {
 			let fecha = new Date()				
 			dia = fecha.getDate()
