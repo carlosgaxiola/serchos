@@ -21,8 +21,6 @@
     <link rel="stylesheet" href="<?php echo base_url("assets/css/bootstrap-dialog.min.css") ?>">    
     <!-- Bootstrap 3.3.7 -->
     <link rel="stylesheet" href="<?php echo base_url("assets/css/bootstrap-3.min.css") ?>">
-    <!-- NotifIt -->
-    <link rel="stylesheet" href="<?php echo base_url("assets/css/notifIt.css") ?>">
     <!-- DatePicker -->
     <link rel="stylesheet" href="<?php echo base_url("assets/css/bootstrap-datepicker.min.css") ?>">
     <!-- TimePicker -->
