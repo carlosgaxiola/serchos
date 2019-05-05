@@ -116,21 +116,15 @@ if (!function_exists("getNombreCompleto")) {
 if (!function_exists("esPadreActual")) {
     function esPadreActual ($idModuloPadre) { 
         $that =& get_instance();
-        $that->load->model("ModulosModelo");
-        $url = uri_string();        
-        $url = explode("/", $url);        
-        $urlModulo = $that->ModulosModelo->buscar(array("url" => $url[0]));        
-        return ($idModuloPadre == $urlModulo['id_padre']);
+        $idModuloActual = $that->session->tempdata('idModuloPadreActual');
+        return ($idModuloPadre == $idModuloActual);
     }
 }
 
 if (!function_exists("esModuloActual")) {
     function esModuloActual ($idModulo) {
         $that =& get_instance();
-        $that->load->model("ModulosModelo");
-        $url = uri_string();
-        $url = explode("/", $url);
-        $urlModulo = $that->ModulosModelo->buscar(array("url" => $url[0]));
-        return ($idModulo == $urlModulo['id']);
+        $idModuloActual = $that->session->tempdata('idModuloActual');
+        return ($idModulo == $idModuloActual);
     }
 }
