@@ -1,3 +1,7 @@
+<?php 
+    // var_dump($this->session->tempdata("idModuloPadreActual"));
+    // var_dump($this->session->tempdata("idModuloActual"));
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -21,6 +25,8 @@
     <link rel="stylesheet" href="<?php echo base_url("assets/css/notifIt.css") ?>">
     <!-- DatePicker -->
     <link rel="stylesheet" href="<?php echo base_url("assets/css/bootstrap-datepicker.min.css") ?>">
+    <!-- TimePicker -->
+    <link rel="stylesheet" href="<?php echo base_url("assets/css/bootstrap-timepicker.min.css") ?>">
 </head>
 <body class="hold-transition skin-red-light sidebar-mini">
 <div class="wrapper">
