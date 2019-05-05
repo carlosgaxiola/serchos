@@ -3,7 +3,6 @@
 <?php $this->load->view("global/aside") ?>
 <main class="content-wrapper">
 	<section class="content" id="tabla">
-		
 	</section>
 	<section class="content" id="form" hidden>
 		
