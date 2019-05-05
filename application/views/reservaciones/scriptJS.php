@@ -49,7 +49,7 @@
 									size: BootstrapDialog.SIZE_SMALL
 								})
 								validar(answ.msg)
-								tabla.row.add([
+								let fila = tabla.row.add([
 									answ.res.id,
 									answ.res.cliente,
 									answ.res.id_mesa,
@@ -60,8 +60,8 @@
 									lblStatus[answ.res.status],
 									btnEdit + "&nbsp;" + btnStatus
 								]).draw()
-								let filas = tabla.rows().nodes()
-								$(filas[filas.length]).data("res", answ.res)
+								let tr = tabla.row(fila).node()
+								$(tr).data("res", answ.res)
 								toogleMain(false)
 							}
 							else if (answ.code == 0)
