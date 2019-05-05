@@ -10,6 +10,9 @@ class Mesas extends MY_Controller {
 		$this->load->helper("global_functions_helper");
 		$this->load->model("MesasModelo");
 		$this->modulo = getModulo("mesas");
+		$moduloPadre = getModulo("Restaurante");
+        $this->session->set_tempdata("idModuloPadreActual", $moduloPadre['id'] , 60);
+        $this->session->set_tempdata("idModuloActual", $this->modulo['id'] , 60);
 	}
 
 	public function index () {

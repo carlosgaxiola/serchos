@@ -13,6 +13,9 @@ class Platillos extends CI_Controller {
         $this->load->model("PlatillosModelo");
         $this->load->helper("global_functions_helper");
         $this->modulo = getModulo($this->modulo);
+        $moduloPadre = getModulo("Restaurante");
+        $this->session->set_tempdata("idModuloPadreActual", $moduloPadre['id'] , 60);
+        $this->session->set_tempdata("idModuloActual", $this->modulo['id'] , 60);
     }
 
     public function index () {

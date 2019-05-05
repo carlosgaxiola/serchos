@@ -9,8 +9,8 @@ class Usuarios extends MY_Controller {
 
     public function __construct () {
     	parent::__construct();
-    	$this->load->helper("global_functions_helper");
-    	$this->modulo = getModulo($this->modulo);
+        $this->modulo = getModulo($this->modulo);
+        $this->session->set_tempdata('idModuloPadreActual', $this->modulo['id'], 60);
     	$this->load->model("UsuariosModelo");
     	$this->load->model("PerfilesModelo");
     }
@@ -33,18 +33,26 @@ class Usuarios extends MY_Controller {
     }
 
     private function singleTipoUsuario ($pluralTipoUsuario) {
-    	if (strcmp($pluralTipoUsuario, "meseros") == 0)
+        $modulo = getModulo($pluralTipoUsuario);
+        $this->session->set_tempdata("idModuloActual", $modulo['id'] , 60);
+    	if (strcmp($pluralTipoUsuario, "meseros") == 0) {
     		return "mesero";
-    	else if (strcmp($pluralTipoUsuario, "cocineros") == 0)
+        }
+    	else if (strcmp($pluralTipoUsuario, "cocineros") == 0) {
     		return "cocina";
-    	else if (strcmp($pluralTipoUsuario, "gerentes") == 0)
+        }
+    	else if (strcmp($pluralTipoUsuario, "gerentes") == 0) {
     		return "gerente";
-    	else if (strcmp($pluralTipoUsuario, "recepcionistas") == 0)
+        }
+    	else if (strcmp($pluralTipoUsuario, "recepcionistas") == 0) {
     		return "recepcionista";
-    	else if (strcmp($pluralTipoUsuario, "cajeros") == 0)
+        }
+    	else if (strcmp($pluralTipoUsuario, "cajeros") == 0) {
     		return "cajero";
-    	else if (strcmp($pluralTipoUsuario, "clientes") == 0)
+        }
+    	else if (strcmp($pluralTipoUsuario, "clientes") == 0) {
     		return "cliente";
+        }
     	else 
     		return "usuario";
     }

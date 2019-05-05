@@ -23,6 +23,9 @@ class Reportes extends MY_Controller {
 				'titulo' => 'Historial del platillos',
 				'platillos' => $this->ReportesModelo->platillos()
 			);
+			$moduloPadre = getModulo("Restaurante");
+	        $this->session->set_tempdata("idModuloPadreActual", $moduloPadre['id'] , 60);
+	        $this->session->set_tempdata("idModuloActual", $this->modulo['id'] , 60);
 			$this->load->view("reportes/platillos/mainVista", $data);
 		}
 		else
@@ -39,6 +42,30 @@ class Reportes extends MY_Controller {
 				'titulo' => 'Reporte diario',
 				'comandas' => $this->ReportesModelo->comandas()
 			);
+			$moduloPadre = getModulo("Reportes");
+		    $this->session->set_tempdata("idModuloPadreActual", $moduloPadre['id'] , 60);
+		    $modulo = getModulo("Reporte Diario");
+		    $this->session->set_tempdata("idModuloActual", $modulo['id'] , 60);
+			$this->load->view("reportes/comandas/mainVista", $data);
+		}
+		else
+			show_404();
+	}
+
+	public function caja () {
+		if (validarAcceso(true)) {
+			$fecha = DateTime::createFromFormat("d/m/Y", $this->input->get("fecha"));
+			echo json_encode($this->ReportesModelo->comandas($fecha->format("Y-m-d")));
+		}
+		else if (validarAcceso()) {
+			$data = array(
+				'titulo' => 'Historial de caja',
+				'comandas' => $this->ReportesModelo->comandas()
+			);
+			$moduloPadre = getModulo("Restaurante");
+		    $this->session->set_tempdata("idModuloPadreActual", $moduloPadre['id'] , 60);
+		    $modulo = getModulo("Historial de caja");
+		    $this->session->set_tempdata("idModuloActual", $modulo['id'] , 60);
 			$this->load->view("reportes/comandas/mainVista", $data);
 		}
 		else
@@ -58,6 +85,10 @@ class Reportes extends MY_Controller {
 				'comandas' => $this->ReportesModelo->comandas(),
 				'rango' => true
 			);
+			$moduloPadre = getModulo("Reportes");
+		    $this->session->set_tempdata("idModuloPadreActual", $moduloPadre['id'] , 60);
+		    $modulo = getModulo("Reporte de rango de fechas");
+		    $this->session->set_tempdata("idModuloActual", $modulo['id'] , 60);
 			$this->load->view("reportes/comandas/mainVista", $data);
 		}
 		else
