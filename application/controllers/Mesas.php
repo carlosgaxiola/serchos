@@ -42,8 +42,10 @@ class Mesas extends MY_Controller {
 					'tipo_mesa' => $post['cmbTipoMesa'],
 					'status' => $post['cmbStatus']
 				);
+				$this->MesasModelo->trans_start();
 				$idMesa = $this->MesasModelo->insertar($mesa);
-				if ($idMesa) {
+				$this->MesasModelo->llenarHorarios($idMesa);
+				if ($this->MesasModelo->trans_end()) {
 					$response['code'] = 1;
 					$response['msg'] = $idMesa;
 				}
