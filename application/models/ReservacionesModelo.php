@@ -5,6 +5,8 @@ class ReservacionesModelo extends MY_Model {
 
 	public function __construct () {
 		parent::__construct();
+		$this->tabla = "reservaciones";
+		$this->view = "listar_reservaciones";
 	}
 
 	public function mesasOcupadas ($fecha, $hora) {
@@ -81,16 +83,26 @@ class ReservacionesModelo extends MY_Model {
 
 	public function horariosDisponibles ($fecha, $tipoMesa = 1) {
 		$horarios = $this->getHorariosReservados($fecha);
-		$this->db->select("DISTINCT hora.hora_inicio, hora.hora_fin", false);
+		$this->db->select("hora.hora_inicio, hora.hora_fin, COUNT(hora.id_mesa) AS mesas", false);
 		$this->db->join("mesas mesa", "mesa.id = hora.id_mesa");
 		$this->db->where("mesa.tipo_mesa", $tipoMesa);
 		$this->db->where("mesa.status", 1);
 		$this->db->where_not_in("hora.id", $horarios);
+		$this->db->group_by("hora.hora_inicio, hora.hora_fin");
 		$this->db->order_by("hora.hora_inicio");
 		$horarios = $this->db->get("horas_mesas hora");
 		if ($horarios->num_rows() > 0)
 			return $horarios->result_array();
 		return false;
+	}
+
+	public function editar ($reservacion) {
+		$this->db->set("fecha", $reservacion['fecha']);
+		$this->db->set("id_hora", $reservacion['id_hora']);
+		$this->db->set("id_cliente", $reservacion['id_cliente']);
+		$this->db->where("id", $reservacion['id']);
+		$this->db->update("reservaciones");
+		return ($this->db->affected_rows() > 0);
 	}
 
 	private function getHorariosReservados ($fecha) {

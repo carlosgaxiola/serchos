@@ -38,6 +38,9 @@
 		</div>
 	</form>
 </script>
+<div class="col-xs-3 col-xs-offset-9">
+	<button type="button" class="btn btn-danger pull-right" id="btn-table"><i class="fas fa-times"></i></button>
+</div>
 <form id="frm-reservacion">
 	<?php 
 		$idPerfil = $this->session->extempo['idPerfil'];
@@ -82,15 +85,14 @@
 			</div>
 			<div class="form-group col-sm-2">
 				<label for="txtFecha">Fecha</label>
-				<input type="text" class="form-control" name="txtFecha" id="txtFecha">
+				<input type="text" class="fecha form-control" name="txtFecha" id="txtFecha">
 				<small class="help-block error-box" style="display: none;"></small>
 			</div>
 			<div class="form-group col-sm-3">
 				<label for="txtHora">Hora</label>
-				<!-- <input type="text" class="form-control" name="txtHora" id="txtHora"> -->
 				<select name="cmbHora" id="cmbHora" class="form-control">
 					<option value="0">Selecciona un hora</option>
-					<option value="1">9:00:00 - 11:00:00</option>
+					<option value="1">09:00:00 - 11:00:00</option>
 					<option value="2">11:00:00 - 13:00:00</option>
 					<option value="3">13:00:00 - 15:00:00</option>
 					<option value="4">15:00:00 - 17:00:00</option>
@@ -103,7 +105,7 @@
 	<div class="row">
 		<div class="col-xs-4">
 			<button type="button" class="btn btn-primary" id="btn-horarios">Horarios disponibles</button>
-			<button type="button" class="btn btn-success" id="btn-save">Reservar</button>
+			<button type="button" data-type="save" class="btn btn-success" id="btn-save">Reservar</button>
 			<button type="button" class="btn btn-default" id="btn-clean">Limpiar</button>
 		</div>
 	</div>
@@ -118,7 +120,7 @@
 				</div>
 			</div>
 			<table id="tblHoras" class="table table-responsive table-striped" style="background-color: white;">
-				<thead><th>Hora Inicio</th><th>Hora Fin</th></thead>
+				<thead><th>Hora Inicio</th><th>Hora Fin</th><th>Mesas</th></thead>
 				<tbody></tbody>
 			</table>
 		</div>

@@ -45,11 +45,11 @@ class Reservaciones extends MY_Controller {
 					$idReservacion = $this->ReservacionesModelo->reservar($reservacion);
 					if ($idReservacion) {
 						$res['msgSuccess'] = "Reservación exitosa"
-							."<br>Reservacion hecha a nombre de <strong>".$post['txtCliente']."</strong>"
+							."<br>Reservación hecha a nombre de <strong>".$post['txtCliente']."</strong>"
 							."<br>Número de reservación: <strong>".$idReservacion."</strong>";
 						$res['msg'] = $this->getFormErrors();
 						$res['code'] = 1;
-						$res['idReservacion'] = $idReservacion;
+						$res['res'] = $this->ReservacionesModelo->buscar(array("id" => $idReservacion));
 					}
 					else {
 						$res['msg'] = "Error al hacer la reservacion.<br>Intente más tarde";
@@ -68,6 +68,51 @@ class Reservaciones extends MY_Controller {
 			echo json_encode($res);
 		}
 		else 
+			show_404();
+	}
+
+	public function edit () {
+		if (validarAcceso(true)) {
+			$res = array();
+			$post = $this->input->post();
+			$fecha = DateTime::createFromFormat("d/m/Y", $post['txtFecha']);
+			if ($this->formValidation()) {
+				$reservacion = array(
+					'id' => $post['idReservacion'],
+					'tipo_mesa' => $post['cmbTipoMesa'],
+					'fecha' => $post['txtFecha'],
+					'hora' => $post['cmbHora'],
+					'id_cliente' => $post['idCliente']
+				);
+				$this->setFechaHora($reservacion);
+				$idHorario = $this->ReservacionesModelo->getIdHorario($reservacion);
+				if ($idHorario) {
+					$reservacion['id_hora'] = $idHorario;
+					if ($this->ReservacionesModelo->editar($reservacion)) {
+						$res['msgSuccess'] = "Reservación modificada"
+							."<br>Reservación hecha a nombre de <strong>".$post['txtCliente']."</strong>"
+							."<br>Número de reservación: <strong>".$post['idReservacion']."</strong>";
+						$res['msg'] = $this->getFormErrors();
+						$res['code'] = 1;
+						$res['res'] = $this->ReservacionesModelo->buscar(array("id" => $post['idReservacion']));
+					}
+					else {
+						$res['msg'] = "Error al modificar la reservacion.<br>Intente más tarde";
+						$res['code'] = -1;
+					}
+				}
+				else {
+					$res['code'] = -1;
+					$res['msg'] = "No hay mesas disponibles<br>Seleccione otro horario o fecha";
+				}
+			}
+			else {
+				$res['msg'] = $this->getFormErrors();
+				$res['code'] = 0;
+			}
+			echo json_encode($res);
+		}
+		else
 			show_404();
 	}
 
@@ -115,9 +160,9 @@ class Reservaciones extends MY_Controller {
 		}
 	}
 
-	public function validarFecha ($fecha) {
+	public function validarFecha ($fecha, $soloDomingos = true) {
 		$fecha = DateTime::createFromFormat("d/m/Y", $fecha);
-		if ($fecha->format("N") != 7) {
+		if ($soloDomingos and $fecha->format("N") != 7) {
 			$this->form_validation->set_message("validarFecha", "Solo se puede reservar los domingos");
 			return false;
 		}
@@ -220,6 +265,46 @@ class Reservaciones extends MY_Controller {
 				$res['data'] = $this->ReservacionesModelo->horariosDisponibles($fecha->format("Y-m-d"), $tipoMesa);
 			}
 			$res['msg'] = $this->getFormErrors();
+			echo json_encode($res);
+		}
+		else
+			show_404();
+	}
+
+	public function data () {
+		if (validarAcceso(true)) {
+			$post = $this->input->post();
+			$this->form_validation->set_rules("fecha", "Fecha", "required|callback_validarFecha");
+			$this->form_validation->set_message("required", "Este campo es obligatorio");
+			if ($this->form_validation->run()) {
+				$fecha = DateTime::createFromFormat("d/m/Y", $post['fecha']);
+				$where['fecha'] = $fecha->format("Y-m-d");
+				$reservaciones = $this->ReservacionesModelo->listar($where);
+				$res['code'] = $reservaciones != false;
+				$res['data'] = $reservaciones;
+			}
+			else {
+				$res['code'] = 0;
+				$res['msg'] = "txtFechaFiltro=".form_error("fecha");
+			}
+			echo json_encode($res);
+		}
+		else
+			show_404();
+	}
+
+	public function cancelar ($idReservacion) {
+		if (validarAcceso(true))  {
+			$where['id'] = $idReservacion;
+			$data['status'] = 0;
+			if ($this->ReservacionesModelo->actualizar($data, $where)) {
+				$res['code'] = 1;
+				$res['msg'] = "Reservación cancelada";
+			}
+			else {
+				$res['code'] = 0;
+				$res['msg'] = "No se pudo cancelar la reservación";
+			}
 			echo json_encode($res);
 		}
 		else
