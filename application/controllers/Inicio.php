@@ -25,11 +25,15 @@ class Inicio extends CI_Controller {
 				case "Mesero":
 				case "Cocina":
 				case "Caja":
-					redirect(base_url("comandas"));
+					redirect(base_url("index.php/comandas"));
 					break;
 				case "Administrador":
 				case "Gerente":
+				case "Cliente":
 					$this->load->view("inicio/inicioVista", $data);
+					break;
+				case "Recepcion":
+					redirect(base_url("index.php/reservaciones"));
 					break;
 			}
 		}
@@ -65,7 +69,8 @@ class Inicio extends CI_Controller {
 					'usuario' => $usuario['usuario'],
 					'contra' => $usuario['contra'],
 					'idPerfil' => $usuario['id_perfil'],
-					'perfil' => $usuario['perfil'],					
+					'perfil' => $usuario['perfil'],
+					'idModuloActual' => -1,
 					'createAt' => $usuario['create_at'],
 					'status' => $usuario['status'],
 					'login' => true
@@ -83,7 +88,7 @@ class Inicio extends CI_Controller {
 
 	public function logout () {
 		$this->session->sess_destroy();
-		header("Location: ".base_url("inicio"));
+		header("Location: ".base_url());
 	}
 
 	public function registro () {
