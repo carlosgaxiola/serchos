@@ -237,8 +237,6 @@
 		$("#tblReservaciones").delegate(".btn-edit-res", "click", function () {
 			let $tr = $(this).parents("tr"), res = $tr.data("res")
 			if (res) {
-				$("#tbl").hide()
-				$("#frm").show()
 				let id = $("#clientes-list option[value='" + res.cliente + "']").data("id-cliente")
 				$("#txtCliente").val(res.cliente).data("id-cliente", id)
 				$("#cmbTipoMesa").val(res.tipo_mesa)
@@ -255,10 +253,11 @@
 					}		
 				}
 				$("#btn-save")
-					.data("type", "edit")
-					.text("Guardar")
 					.data("id-res", res.id)
 					.data("tr", $tr)
+					.data("type", "edit")
+					.text("Guardar")
+				toogleMain()
 			}
 			else
 				errorDialog("La reservación no es válida")
@@ -331,7 +330,6 @@
 			if (frm) {
 				$("#tbl").hide()
 				$("#frm").show()
-				$("#btn-save").data("type", "save")
 			}
 			else {
 				$("#tbl").show()
@@ -341,6 +339,7 @@
 				$("#cmbTipoMesa").val(0)
 				$("#txtFecha").val(moment().format("DD/MM/YYYY"))
 				$("#cmbHora").val(0)
+				$("#btn-save").text("Resevar").data("type", "save")
 			}
 		}
 

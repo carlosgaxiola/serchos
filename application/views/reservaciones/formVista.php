@@ -50,30 +50,32 @@
 	?>
 	<?php if ($idPerfil != false): ?>
 		<div class="row">
-			<div class="form-group col-sm-3">
-				<label for="txtCliente">Cliente</label>
-				<input type="text" placeholder="Selecciona un cliente" name="txtCliente" id="txtCliente" class="form-control" list="clientes-list">
-				<button type="button" class="btn btn-sm btn-primary" id="btn-add-cliente"
-					style="
-					    float: right;
-					    margin-top: -33px;
-					    margin-right: -40px;
-					">
-					<i class="fas fa-user-plus"></i>
-				</button>
-				<small class="help-block error-box"></small>
-				<datalist id="clientes-list">
-					<?php if (is_array($clientes)): ?>
-						<?php foreach ($clientes as $cliente): ?>
-							<?php 
-								$nombre = $cliente['nombre']." ".$cliente['paterno']." ".$cliente['materno']; 
-							?>
-							<option value="<?php echo $nombre ?>" data-id-cliente="<?php echo $cliente['id'] ?>">
-							</option>
-						<?php endforeach; ?>
-					<?php endif; ?>
-				</datalist>
-			</div>
+			<?php if ($this->session->extempo['idPerfil'] != getIdPerfil("Cliente")): ?>
+				<div class="form-group col-sm-3">
+					<label for="txtCliente">Cliente</label>
+					<input type="text" placeholder="Selecciona un cliente" name="txtCliente" id="txtCliente" class="form-control" list="clientes-list">
+					<button type="button" class="btn btn-sm btn-primary" id="btn-add-cliente"
+						style="
+						    float: right;
+						    margin-top: -33px;
+						    margin-right: -40px;
+						">
+						<i class="fas fa-user-plus"></i>
+					</button>
+					<small class="help-block error-box"></small>
+					<datalist id="clientes-list">
+						<?php if (is_array($clientes)): ?>
+							<?php foreach ($clientes as $cliente): ?>
+								<?php 
+									$nombre = $cliente['nombre']." ".$cliente['paterno']." ".$cliente['materno']; 
+								?>
+								<option value="<?php echo $nombre ?>" data-id-cliente="<?php echo $cliente['id'] ?>">
+								</option>
+							<?php endforeach; ?>
+						<?php endif; ?>
+					</datalist>
+				</div>
+			<?php endif; ?>
 			<div class="form-group col-sm-3" style="margin-left: 20px;">
 				<label for="cmbTipoMesa">Tipo de mesa</label>
 				<select name="cmbTipoMesa" id="cmbTipoMesa" class="form-control">

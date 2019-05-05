@@ -35,17 +35,28 @@ class Reservaciones extends MY_Controller {
 				$reservacion = array(
 					'tipo_mesa' => $post['cmbTipoMesa'],
 					'fecha' => $post['txtFecha'],
-					'hora' => $post['cmbHora'],
-					'id_cliente' => $post['idCliente']
+					'hora' => $post['cmbHora']
 				);
+				if ($this->session->extempo['idPerfil'] != getIdPerfil("Cliente"))
+					$reservacion['id_cliente'] = $post['idCliente'];
+				else
+					$reservacion['id_cliente'] = $this->session->extempo['idUsuario'];
 				$this->setFechaHora($reservacion);
 				$idHorario = $this->ReservacionesModelo->getIdHorario($reservacion);
 				if ($idHorario) {
 					$reservacion['id_hora'] = $idHorario;
 					$idReservacion = $this->ReservacionesModelo->reservar($reservacion);
 					if ($idReservacion) {
+						if (isset($post['txtCliente']) and !empty($post['txtCliente'])) {
+							$cliente = $post['txtCliente'];
+						}
+						else {
+							$cliente = $this->session->extempo['nombre']." ".
+								$this->session->extempo['paterno']." ".
+								$this->session->extempo['materno'];
+						}
 						$res['msgSuccess'] = "Reservación exitosa"
-							."<br>Reservación hecha a nombre de <strong>".$post['txtCliente']."</strong>"
+							."<br>Reservación hecha a nombre de <strong>".$cliente."</strong>"
 							."<br>Número de reservación: <strong>".$idReservacion."</strong>";
 						$res['msg'] = $this->getFormErrors();
 						$res['code'] = 1;
@@ -81,9 +92,12 @@ class Reservaciones extends MY_Controller {
 					'id' => $post['idReservacion'],
 					'tipo_mesa' => $post['cmbTipoMesa'],
 					'fecha' => $post['txtFecha'],
-					'hora' => $post['cmbHora'],
-					'id_cliente' => $post['idCliente']
+					'hora' => $post['cmbHora']
 				);
+				if ($this->session->extempo['idPerfil'] != getIdPerfil("Cliente"))
+					$reservacion['id_cliente'] = $post['idCliente'];
+				else
+					$reservacion['id_cliente'] = $this->session->extempo['idUsuario'];
 				$this->setFechaHora($reservacion);
 				$idHorario = $this->ReservacionesModelo->getIdHorario($reservacion);
 				if ($idHorario) {
@@ -160,9 +174,9 @@ class Reservaciones extends MY_Controller {
 		}
 	}
 
-	public function validarFecha ($fecha, $soloDomingos = true) {
+	public function validarFecha ($fecha) {
 		$fecha = DateTime::createFromFormat("d/m/Y", $fecha);
-		if ($soloDomingos and $fecha->format("N") != 7) {
+		if ($fecha->format("N") != 7) {
 			$this->form_validation->set_message("validarFecha", "Solo se puede reservar los domingos");
 			return false;
 		}
@@ -236,10 +250,10 @@ class Reservaciones extends MY_Controller {
 					'contra' => $post['txtContra'],
 					'id_perfil' => getIdPerfil("Cliente")
 				);
-				$idUsaurio = $this->UsuariosModelo->insertar($cliente);
-				if ($idUsaurio) {
+				$idUsuario = $this->UsuariosModelo->insertar($cliente);
+				if ($idUsuario) {
 					$res['code'] = 1;
-					$res['msg'] = $idUsaurio;
+					$res['msg'] = $idUsuario;
 				}
 				else {
 					$res['code'] = -1;
@@ -279,6 +293,8 @@ class Reservaciones extends MY_Controller {
 			if ($this->form_validation->run()) {
 				$fecha = DateTime::createFromFormat("d/m/Y", $post['fecha']);
 				$where['fecha'] = $fecha->format("Y-m-d");
+				if ($this->session->extempo['idPerfil'] == getIdPerfil("Cliente"))
+					$where['id_cliente'] = $this->session->extempo['idUsuario'];
 				$reservaciones = $this->ReservacionesModelo->listar($where);
 				$res['code'] = $reservaciones != false;
 				$res['data'] = $reservaciones;
