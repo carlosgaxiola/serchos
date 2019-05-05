@@ -59,7 +59,7 @@
 	<script src="<?php echo base_url("assets/js/sha1-jshash.js") ?>"></script>
 	<!-- Inicio JS -->
 	<script>
-		var base_url = '<?php echo base_url() ?>';
+		var base_url = '<?php echo base_url("index.php/") ?>';
 
 		$('.LetrasNumeros').on('input', function (e) {
             if (!/^[ a-z0-9áéíóúüñ]*$/i.test(this.value)) {
@@ -68,7 +68,7 @@
         })
 
         $("#btn-registro").click( function () {
-            window.location.href = base_url + "registro"
+            window.location.href = base_url + "inicio/registro"
         })
 
         $("#btn-entrar").click(function () {        	
