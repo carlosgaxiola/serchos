@@ -33,7 +33,8 @@ class Platillos extends CI_Controller {
     public function add () {
         if (validarAcceso() and $this->input->is_ajax_request()) {
             $post = $this->input->post();
-            $fecha = DateTime::createFromFormat("d/m/Y", $post['fecha']);
+            date_default_timezone_set("America/Mazatlan");
+            $fecha = new datetime();
             $response = array();
             if ($this->form_validation()) {
                 $platillo = array(
@@ -50,51 +51,52 @@ class Platillos extends CI_Controller {
                 else {
                     $response['code'] = -1;
                     $response['msg'] = "No se pudo guardar el platillo";
+                    $platillo['id'] = $idPlatillo;
+                    $response['platillo'] = $platillo;
                 }
-                echo json_encode($response);
             }
             else {
                 $response['code'] = 0;
                 $response['msg'] = $this->get_erorr_message();
-                echo json_encode($response);
             }
+            echo json_encode($response);
         }
         else
             show_404();
     }
 
     public function edit () {
-        if (validarAcceso() and $this->input->is_ajax_request()) {
+        if (validarAcceso(true)) {
             $post = $this->input->post();
-            $response = array();
+            $answ = array();
             if ($this->form_validation($post['idPlatillo'])) {
                 $platillo = array(
                     'nombre' => $post['txtNombre'],
                     'precio' => $post['txtPrecio']
                 );
                 $where = array("id" => $post['idPlatillo']);
-                if ($this->PlatillosModelo->actualizar($platillo, $where)) {
-                    $response['code'] = 1;
-                    $response['msg'] = $post['idPlatillo'];
+                if (!$this->PlatillosModelo->actualizar($platillo, $where)) {
+                    $answ['code'] = -1;
+                    $answ['msg'] = "No se pudo actualizar el platillo";
                 }
                 else {
-                    $response['code'] = -1;
-                    $response['msg'] = "No se pudo actualizar el platillo";
+                    $answ['code'] = 1;
+                    $answ['msg'] = $post['idPlatillo'];
+                    $answ['platillo'] = $this->PlatillosModelo->buscar($post['idPlatillo']);
                 }
-                echo json_encode($response);
             }
             else {
-                $response['code'] = 0;
-                $response['msg'] = $this->get_erorr_message();
-                echo json_encode($response);
+                $answ['code'] = 0;
+                $answ['msg'] = $this->get_erorr_message();
             }
+            echo json_encode($answ);
         }
         else
             show_404();
     }
 
     public function toggle () {
-        if (validarAcceso() and $this->input->is_ajax_request()) {
+        if (validarAcceso(true)) {
             $post = $this->input->post();
             $where = array("id" => $post["idPlatillo"]);
             $data = array("status" => $post["status"]);

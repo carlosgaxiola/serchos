@@ -4,7 +4,7 @@
 	</div>
 </div>
 <form id="frm-platillo">
-	<input type="hidden" id="idPlatillo">
+	<input type="hidden" id="idPlatillo" name="idPlatillo">
 	<div class="row">
 		<div class="form-group col-sm-4">
 			<label for="txtNombre">Nombre</label>
