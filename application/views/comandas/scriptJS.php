@@ -652,6 +652,6 @@
 		getPlatillos()
 
 		// $("#btn-act").click(function () { init() })
-		// setInterval(init, 1000 * 5)
+		setInterval(init, 1000 * 5)
 	})
 </script>
