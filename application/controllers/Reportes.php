@@ -105,7 +105,7 @@ class Reportes extends MY_Controller {
 					$fecha = DateTime::createFromFormat("d/m/Y", $get["fecha"]);
 					$header = array("#", "Nombre", "Cantidad", "Precio", "Subtotal");
 					$pdf = new PDF();
-					$pdf->SetFont('Arial','',14);
+					$pdf->SetFont('times','',14);
 					$pdf->AddPage();
 					$pdf->Cell(40, 10, 'Reporte de platillos de la fecha: '.$fecha->format("d/m/Y"), 0, 1);
 					$data = $this->ReportesModelo->platillos($fecha->format("Y-m-d"));
@@ -120,7 +120,7 @@ class Reportes extends MY_Controller {
 					$fecha = DateTime::createFromFormat("d/m/Y", $get["fecha"]);
 					$header = array("#", "Mesa", "Total", "Fecha", "Hora", "Estado");
 					$pdf = new PDF();
-					$pdf->SetFont('Arial','', 12);
+					$pdf->SetFont('times','', 12);
 					$pdf->AddPage();
 					$pdf->Cell(40, 10, 'Reporte diario de la fecha: '.$fecha->format("d/m/Y"), 0, 1);
 					$data = $this->ReportesModelo->comandas($fecha->format("Y-m-d"));
@@ -134,12 +134,12 @@ class Reportes extends MY_Controller {
 					}
 					$pdf->tablaComandas($header, $data);
 					$pdf->Cell(60, 10, 'Total Pagadas: ', 0, 0, "R");
-					$pdf->SetFont('Arial', 'B', 12);
+					$pdf->SetFont('times', 'B', 12);
 					$pdf->Cell(10, 10, $totalPagadas, 0, 0, "R");
-					$pdf->SetFont('Arial', '', 12);
+					$pdf->SetFont('times', '', 12);
 
 					$pdf->Cell(40, 10, 'Total Rechazadas: ', 0, 0, "R");
-					$pdf->SetFont('Arial', 'B', 12);
+					$pdf->SetFont('times', 'B', 12);
 					$pdf->Cell(10, 10, $totalRechazadas, 0, 0, "R");
 					$pdf->Output();
 					break;
@@ -148,10 +148,10 @@ class Reportes extends MY_Controller {
 					$fin = DateTime::createFromFormat("d/m/Y", $get["fin"]);
 					$header = array("#", "Mesa", "Total", "Fecha", "Hora", "Estado");
 					$pdf = new PDF();
-					$pdf->SetFont('Arial','', 12);
+					$pdf->SetFont('times','', 12);
 					$pdf->AddPage();
 					$pdf->Cell(40, 10, 'Reporte rango de fechas', 0, 1);
-					$pdf->SetFont('Arial', 'B', 12);
+					$pdf->SetFont('times', 'B', 12);
 					$pdf->Cell(40, 10, 'Inicio: '.$inicio->format("d/m/Y"), 0, 0);
 					$pdf->Cell(40, 10, 'Fin: '.$fin->format("d/m/Y"), 0, 1);
 					$data = $this->ReportesModelo
@@ -166,11 +166,11 @@ class Reportes extends MY_Controller {
 					}
 					$pdf->tablaComandas($header, $data);
 					$pdf->Cell(90, 10, 'Total Pagadas: ', 0, 0, "R");
-					$pdf->SetFont('Arial', 'B', 12);
+					$pdf->SetFont('times', 'B', 12);
 					$pdf->Cell(10, 10, $totalPagadas, 0, 0, "R");
-					$pdf->SetFont('Arial', '', 12);
+					$pdf->SetFont('times', '', 12);
 					$pdf->Cell(40, 10, 'Total Rechazadas: ', 0, 0, "R");
-					$pdf->SetFont('Arial', 'B', 12);
+					$pdf->SetFont('times', 'B', 12);
 					$pdf->Cell(10, 10, $totalRechazadas, 0, 0, "R");
 					$pdf->Output();
 					break;

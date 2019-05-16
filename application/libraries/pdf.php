@@ -36,7 +36,7 @@ class PDF extends FPDF {
 	    $this->SetDrawColor(0,0,0);
 	    $this->SetLineWidth(.3);
 	    $this->SetFont('','B');
-	    $w = array(10, 20, 30, 30, 30, 30);
+	    $w = array(10, 25, 30, 30, 30, 30);
 	    // echo array_sum($w);
 	   	// $this->Cell(10, 10, 6, array_sum($w), 0, 1);
 	    for ($i = 0; $i < count($header); $i++)
