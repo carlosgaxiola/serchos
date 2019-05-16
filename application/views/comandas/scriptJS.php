@@ -651,7 +651,7 @@
 		buscarPlatillo()
 		getPlatillos()
 
-		$("#btn-act").click(function () { init() })
+		// $("#btn-act").click(function () { init() })
 		// setInterval(init, 1000 * 5)
 	})
 </script>

@@ -135,7 +135,7 @@
 	            	</div>
 	            </div>
         	</div>
-        	<button type="button" id="btn-act">actualizar</button>
+        	<!-- <button type="button" id="btn-act">actualizar</button> -->
 		</div>
 		<div class="col-sm-6" id="tabla-detalle-comanda">
 			<h3 style="margin-top: 0;">Detalle de comanda</h3>
