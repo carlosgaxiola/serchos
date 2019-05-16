@@ -25,7 +25,6 @@ class ReportesModelo extends MY_Model {
 
 	public function comandas ($inicio = '', $fin = '') {
 		date_default_timezone_set('America/Mazatlan');
-
 		if (!empty($inicio) and !empty($fin)) {
 			$inicio = new datetime($inicio);
 			$this->db->where("fecha >= DATE('".$inicio->format("Y-m-d")."')");
@@ -41,8 +40,8 @@ class ReportesModelo extends MY_Model {
 		}
 		$this->db
 			->group_start()
-				->where("status", 3)
-				->or_where("status", 0)
+				->where("com.status", 3)
+				->or_where("com.status", 0)
 			->group_end();
 		$this->db->join("usuarios usu", "usu.id = com.id_usuario");
 		$this->db->join("mesas mesa", "mesa.id = com.id_mesa");
