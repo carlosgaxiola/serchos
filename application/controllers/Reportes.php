@@ -97,7 +97,7 @@ class Reportes extends MY_Controller {
 
 	public function generar ($tipo) {
 		if (validarAcceso()) {
-			$this->load->library("pdf");
+			$this->load->library("Pdf");
 			$tipo = strtolower($tipo);
 			$get = $this->input->get();
 			switch ($tipo) {

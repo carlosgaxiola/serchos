@@ -1,7 +1,7 @@
 <?php
 require('fpdf/fpdf.php');
 
-class PDF extends FPDF {
+class Pdf extends FPDF {
 
 	function tablaPlatillos ($header, $data) {
 	    $this->SetFillColor(200,200,200);
