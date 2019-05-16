@@ -43,7 +43,7 @@ class ReportesModelo extends MY_Model {
 				->where("com.status", 3)
 				->or_where("com.status", 0)
 			->group_end();
-		$this->db->join("usuarios usu", "usu.id = com.id_usuario");
+		$this->db->join("usuarios usu", "usu.id = com.id_cliente");
 		$this->db->join("mesas mesa", "mesa.id = com.id_mesa");
 		$this->db->select("com.*");
 		$this->db->select("CONCAT(usu.nombre, ' ', usu.paterno, ' ', usu.materno) AS mesero");
