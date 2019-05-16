@@ -44,8 +44,12 @@ class ReportesModelo extends MY_Model {
 				->where("status", 3)
 				->or_where("status", 0)
 			->group_end();
-		$comandas = $this->db->get("listar_comandas");
-		// echo $this->db->last_query();
+		$this->db->join("usuarios usu", "usu.id = com.id_usuario");
+		$this->db->join("mesas mesa", "mesa.id = com.id_mesa");
+		$this->db->select("com.*");
+		$this->db->select("CONCAT(usu.nombre, ' ', usu.paterno, ' ', usu.materno) AS mesero");
+		$this->db->select("IF(mesa.tipo_mesa = 1, 'Mesa para 2', 'Mesa para 4') AS mesa");
+		$comandas = $this->db->get("comandas com");
 		if ($comandas->num_rows() > 0)
 			return $comandas->result_array();
 		return false;

@@ -24,9 +24,12 @@ class ComandasModelo extends MY_Model {
 	}
 
 	public function getDetallesComanda ($idComanda) {
-		$this->view = "listar_detalle_comandas";
-		$where = array("id_comanda" => $idComanda);
-		return parent::listar($where);
+		$this->db->select("det.*, pla.nombre AS platillo");
+		$this->db->join("platillos pla", "pla.id = det.id_platillo");
+		$detalles = $this->db->get("detalle_comandas det");
+		if ($detalles->num_rows() > 0)
+			return $detalles->result_array();
+		return false;
 	}
  
 	public function funcion () {

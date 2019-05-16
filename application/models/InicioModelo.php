@@ -13,7 +13,7 @@ class InicioModelo extends MY_Model {
 		$this->db->where("usuario", $usuario);
 		$this->db->where("contra", $contra);
 		$this->db->where("status", 1);		
-		$registro = $this->db->get("listar_usuarios");
+		$registro = $this->db->get("usuarios");
 		if ($registro->num_rows() > 0)
 			return $registro->row_array();
 		return false;
