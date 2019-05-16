@@ -1,10 +1,8 @@
 <script>
 	Array.prototype.remove = function (element) {
-		if (typeof element == "object") {
-			let index = this.indexOf(element)
-			    if (index > -1)
-			    	this.splice(index, 1)
-		}
+		let index = this.indexOf(element)
+	    if (index > -1)
+	    	this.splice(index, 1)
 	}
 
 	function buscarPlatillo ( nombre = '' ) {
@@ -46,31 +44,38 @@
 			comandasBgs = [
 				'bg-red',
 				'bg-yellow',
+				'bg-info',
 				'bg-blue',
 				'bg-green'
 			],
 			comandasGroups = [
 				'rechazadas',
 				'nuevas',
-				'atendidas',
+				'preparadas',
+				'entregadas',
 				'pagadas'
 			],
-			comandasList = {nuevas: [], atendidas: [], pagadas: [], rechazadas: []},
-			trNoDetalle = '<tr><td colspan="4" class="text-muted text-center"><h4>Selecciona una comanda</h4></td></tr>';
+			comandasList = {nuevas: [], preparadas: [], entregadas: [], pagadas: [], rechazadas: []},
+			trNoDetalle = '<tr><td colspan="5" class="text-muted text-center"><h4>Selecciona una comanda</h4></td></tr>';
 		<?php if ($this->session->extempo['idPerfil'] == getIdPerfil("Caja")): ?>
 			let actionBnts = [
 				"<button disabled='true' type='button' id='btn-pagar' class='btn btn-success'>Pagar</button>",
 				"<button disabled='true' type='button' id='btn-limpiar' data-type='clean' class='btn btn-defualt'>Limpiar</button>"
 			];
+		<?php elseif ($this->session->extempo['idPerfil'] == getIdPerfil("Mesero")): ?>
+			let actionBnts = [
+				"<button disabled='true' type='button' id='btn-entregar' class='btn btn-primary'>Entregar</button>"
+			];
 		<?php elseif ($this->session->extempo['idPerfil'] == getIdPerfil("Cocina")): ?>
 			let actionBnts = [
-				"<button disabled='true' type='button' id='btn-antender' class='btn btn-primary'>Atender</button>",
+				"<button disabled='true' type='button' id='btn-antender' class='btn btn-primary'>Preparar</button>",
 				"<button disabled='true' type='button' id='btn-limpiar' data-type='clean' class='btn btn-default'>Limpiar</button>"
 			];
 		<?php elseif ($this->session->extempo['idPerfil'] == getIdPerfil("Administrador")): ?>
 			let actionBnts = [
 				"<button disabled='true' type='button' id='btn-pagar' class='btn btn-success'>Pagar</button>",
-				"<button disabled='true' type='button' id='btn-antender' class='btn btn-primary'>Atender</button>",
+				"<button disabled='true' type='button' id='btn-antender' class='btn btn-primary'>Preparar</button>",
+				"<button disabled='true' type='button' id='btn-entregar' class='btn btn-primary'>Entregar</button>",
 				"<button disabled='true' type='button' id='btn-rechazar' class='btn btn-danger'>Rechazar</button>",
 				"<button disabled='true' type='button' data-type='edit' id='btn-editar-comanda' class='btn btn-warning'>Editar</button>",
 				"<button disabled='true' type='button' id='btn-add-platillo' class='btn btn-success'>Añadir Platillo</button>",
@@ -96,21 +101,28 @@
 				for (let detalle of comanda.detalles) {
 					$("#tbl-detalle tbody")
 						.append($("<tr></tr>")
+							.data("detalle", detalle)
 							.append("<td class='platillo-nombre'>" + detalle.platillo + "</td>")
 							.append("<td class='cantidad'>" + detalle.cantidad + "</td>")
 							.append("<td class='precio'>" + detalle.precio + "</td>")
 							.append("<td class='subtotal'>" + (detalle.cantidad * detalle.precio) + "</td>")
+							<?php if ($this->session->extempo['idPerfil'] == getIdPerfil("Administrador") ||
+									$this->session->extempo['idPerfil'] == getIdPerfil("Cocina")): ?>
+								.append("<td><button type='button' class='btn btn-sm btn-primary btn-listo' title='Listo'>" + 
+											"<i class='fas fa-check'></i></button></td>")
+							<?php endif; ?>
 						)
 				}
 				$("#fecha-comanda").text(moment(comanda.fecha).format("DD/MM/YYYY"))
 				$("#hora-comanda").text(comanda.hora)
 				$("#total-comanda").text(comanda.total)
 				$("#observaciones").text(comanda.observaciones)
+				$("#btn-entregar").prop("disabled", comanda.status != 2)
 				$("#btn-antender").prop("disabled", comanda.status != 1)
-				$("#btn-pagar").prop("disabled", comanda.status != 2)
-				$("#btn-rechazar").prop("disabled", comanda.status != 1)
-				$("#btn-add-platillo").prop("disabled", comanda.status == 3 || comanda.status == 0)
-				$("#btn-editar-comanda").prop("disabled", comanda.status == 3 || comanda.status == 0)
+				$("#btn-pagar").prop("disabled", comanda.status != 3)
+				$("#btn-rechazar").prop("disabled", comanda.status == 0 || comanda.status == 4)
+				$("#btn-add-platillo").prop("disabled", comanda.status != 1 || comanda.status != 2)
+				$("#btn-editar-comanda").prop("disabled", comanda.status != 1 || comanda.status != 2)
 				$("#btn-limpiar").prop("disabled", false)
 				$("#tabla-detalle-comanda").data("comanda", comanda)
 			}
@@ -280,8 +292,8 @@
 			let comanda = $("#tabla-detalle-comanda").data("comanda");
 			if (comanda) {
 				BootstrapDialog.confirm({
-					title: "Atender",
-					message: "Se atendera la comanda de la <strong>mesa " + comanda.id_mesa + "</strong>",
+					title: "Preparar",
+					message: "Se preparara la comanda de la <strong>mesa " + comanda.id_mesa + "</strong>",
 					type: BootstrapDialog.TYPE_PRIMARY,
 					btnOKLabel: "Aceptar",
 					btnOKClass: "btn-primary",
@@ -289,7 +301,7 @@
 					callback: function ( res ) {
 						if (res) {
 							$.ajax({
-								url: base_url + "comandas/atender/" + comanda.id,
+								url: base_url + "comandas/preparar/" + comanda.id,
 								success: function ( res ) {
 									try {
 										res = JSON.parse(res)
@@ -299,7 +311,7 @@
 											addComandaList(comanda)
 										}
 										else if (res.code == 0) {
-											errorDialog("Error al atender la comanda")
+											errorDialog("Error al Preparar la comanda")
 										}
 									}
 									catch ( e ) { console.error(e) }
@@ -350,6 +362,39 @@
 			else {
 				errorDialog("Selecciona una comanda")
 			}
+		})
+
+		$("#btn-entregar").click( function () {
+			let comanda = $("#tabla-detalle-comanda").data("comanda")
+			if (comanda) {
+				BootstrapDialog.confirm({
+					title: 'Entregar comanda',
+					message: "Se entregara la comanda " + comanda.id,
+					btnOKClass: 'btn-primary',
+					btnOKLabel: 'Sí',
+					btnCancelLabel: 'No',
+					callback: function ( res ) {
+						if (res) {
+							$.ajax({
+								url: base_url + "comandas/entregar/" + comanda.id,
+								success: function ( answ ) {
+									try {
+										answ = JSON.parse(answ)
+										if (answ.code == 1) {
+											delComanadList(comanda)
+											comanda.status = 3
+											addComandaList(comanda)
+											setDetalles(comanda)
+										}
+									} catch ( e ) { console.error( e ) }
+								}
+							})
+						}
+					}
+				})
+			}
+			else
+				errorDialog("Comanda no válida")
 		})
 
 		$("#btn-add-platillo").click( function () {
@@ -452,6 +497,24 @@
 			})
 		})
 
+		$("#tbl-detalle").delegate(".btn-listo", "click", function () {
+			let $btn = $(this), $tr = $btn.parents("tr"), pla = $tr.data("detalle")
+			$.ajax({
+				url: base_url + "comandas/listo/" + pla.id_comanda + "/" + pla.id_platillo,
+				success: function ( answ ) {
+					try {
+						answ = JSON.parse(answ)
+						if (answ.code == 1) {
+							$btn.fadeOut("slow", function () {
+								$btn.replaceWith("<span class='label label-success'>Listo<span>")
+								$btn.fadeIn("fast")
+							})
+						}
+					} catch ( e ) { console.error( e ) }
+				}
+			})
+		})
+
 		function validarDetalles (detalles) {
 			let comanda = $("#tabla-detalle-comanda").data("comanda")
 			if (detalles) {
@@ -529,18 +592,21 @@
 		function delComanadList (comandaDel) {
 			let comandas = $("#" + comandasGroups[comandaDel.status] + " .comanda").toArray(),
 				totalComandas = comandas.length;
-			for (let comanda of comandas)
-				if ($(comanda).data("id") == comandaDel.id) {
-					$(comanda).remove()
-					totalComandas--;
-					if (totalComandas == 0) {
-						$("#" + comandasGroups[comandaDel.status] + " .default-message").show()
-						totalComandas = ''
+			if (totalComandas > 0) {
+				for (let comanda of comandas) {
+					if ($(comanda).data("id") == comandaDel.id) {
+						$(comanda).remove()
+						totalComandas--;
+						if (totalComandas == 0) {
+							$("#" + comandasGroups[comandaDel.status] + " .default-message").show()
+							totalComandas = ''
+						}
+						$("#" + comandasGroups[comandaDel.status] + "-tab a sup").text(totalComandas)
+						comandasList[comandasGroups[comandaDel.status]].remove(comandaDel.id)
+						break
 					}
-					$("#" + comandasGroups[comandaDel.status] + "-tab a sup").text(totalComandas)
-					comandasList[comandasGroups[comandaDel.status]].remove(comandaDel.id)
-					break
 				}
+			}
 		}
 
 		function init () {
@@ -568,20 +634,10 @@
 					if (!isNaN(index)) {
 						let comanda = comandas[index]
 						if (comandasList[comandasGroups[comanda.status]].indexOf(comanda.id) == -1) {
-							addComandaList(comanda)
 							copiaComanda = $.extend({}, comanda)
-							if (copiaComanda.status == 0) {
-								copiaComanda.status = 3;
+							for (copiaComanda.status = 0; copiaComanda.status < 5; copiaComanda.status++)
 								delComanadList(copiaComanda)
-							}
-							if (copiaComanda.status == 3) {
-								copiaComanda.status = 2;
-								delComanadList(copiaComanda)
-							}
-							if (copiaComanda.status == 2) {
-								copiaComanda.status = 1;
-								delComanadList(copiaComanda)
-							}
+							addComandaList(comanda)
 						}
 					}
 				}
@@ -595,6 +651,7 @@
 		buscarPlatillo()
 		getPlatillos()
 
-		setInterval(init, 1000 * 5)
+		$("#btn-act").click(function () { init() })
+		// setInterval(init, 1000 * 5)
 	})
 </script>

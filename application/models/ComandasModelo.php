@@ -26,6 +26,7 @@ class ComandasModelo extends MY_Model {
 	public function getDetallesComanda ($idComanda) {
 		$this->db->select("det.*, pla.nombre AS platillo");
 		$this->db->join("platillos pla", "pla.id = det.id_platillo");
+		$this->db->where("id_comanda", $idComanda);
 		$detalles = $this->db->get("detalle_comandas det");
 		if ($detalles->num_rows() > 0)
 			return $detalles->result_array();

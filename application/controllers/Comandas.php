@@ -90,7 +90,7 @@ class Comandas extends MY_Controller {
 			show_404();
 	}
 
-	public function atender ($idComanda) {
+	public function preparar ($idComanda) {
 		$puedeAtender = $this->session->extempo['perfil'] == "Gerente" || $this->session->extempo['perfil'] == "Administrador" || $this->session->extempo['perfil'] == "Cocina";
 		if (validarAcceso(true) and $puedeAtender) {
 			$data = array("status" => 2);
@@ -98,6 +98,27 @@ class Comandas extends MY_Controller {
 		}
 		else
 			show_404();
+	}
+
+	public function listo ($idComanda, $idPlatillo) {
+		$puedePreparar = $this->session->extempo['idPerfil'] == getIdPerfil("Administrador") ||
+			$this->session->extempo['idPerfil'] == getIdPerfil("Cocina");
+		if (validarAcceso(true) and $puedePreparar) {
+			$data['status'] = 3;
+			$where = array("id_comanda" => $idComanda, 'id_platillo' => $idPlatillo);
+			echo json_encode(array("code" => $this->ComandasDetalleModelo->actualizar($data, $where)));
+		}
+		else
+			show_404();
+	}
+	public function entregar ($idComanda) {
+		$peudeEntregar = $this->seesion->extempo['perfil'] = "Gerente" || 
+			$this->session->extempo['perfil'] == "Administrador" ||
+			$this->session->extempo['perfil'] == "Mesero";
+		if (validarAcceso(true) and $peudeEntregar) {
+			$data['status'] = 3;
+			echo json_encode(array("code" => $this->ComandasModelo->actualizar($data, $idComanda)));
+		}
 	}
 
 	public function pagar ($idComanda) {

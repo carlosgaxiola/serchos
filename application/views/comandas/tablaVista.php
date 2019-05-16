@@ -72,9 +72,15 @@
 		            		<sup></sup>
 		            	</a>
 		            </li>
-		            <li id="atendidas-tab">
-		            	<a href="#atendidas" data-toggle="tab">
-		            		<span class="label label-primary">Atendidas</span>
+		            <li id="preparadas-tab">
+		            	<a href="#preparadas" data-toggle="tab">
+		            		<span class="label label-info">Preparadas</span>
+		            		<sup></sup>
+		            	</a>
+		            </li>
+		            <li id="entregadas-tab">
+		            	<a href="#entregadas" data-toggle="tab">
+		            		<span class="label label-primary">Entregadas</span>
 		            		<sup></sup>
 		            	</a>
 		            </li>
@@ -99,10 +105,17 @@
 							</div>
 						</div>
 	            	</div>
-	              	<div class="tab-pane" id="atendidas">
+	              	<div class="tab-pane" id="preparadas">
 	                	<div class="pre-scrollable" style="padding: 1%;">
 	                		<div class="default-message" class="text-muted">
-								<strong>No hay comandas atendidas</strong>
+								<strong>No hay comandas preparadas</strong>
+							</div>
+	                	</div>
+	            	</div>
+	            	<div class="tab-pane" id="entregadas">
+	                	<div class="pre-scrollable" style="padding: 1%;">
+	                		<div class="default-message" class="text-muted">
+								<strong>No hay comandas entregadas</strong>
 							</div>
 	                	</div>
 	            	</div>
@@ -122,6 +135,7 @@
 	            	</div>
 	            </div>
         	</div>
+        	<button type="button" id="btn-act">actualizar</button>
 		</div>
 		<div class="col-sm-6" id="tabla-detalle-comanda">
 			<h3 style="margin-top: 0;">Detalle de comanda</h3>
@@ -132,6 +146,10 @@
 						<th>Cantidad</th>
 						<th>Precio</th>
 						<th>Subtotal</th>
+						<?php if ($this->session->extempo['idPerfil'] == getIdPerfil("Administrador") || 
+							$this->session->extempo['idPerfil'] == getIdPerfil("Cocina")): ?>
+							<th>Acción</th>
+						<?php endif; ?>
 					</thead>
 					<tbody>
 					</tbody>
@@ -168,5 +186,4 @@
 	</div>	
 </div>
 <datalist id='platillos'>
-	
 </datalist>

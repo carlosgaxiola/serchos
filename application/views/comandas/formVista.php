@@ -1,5 +1,4 @@
 <form id="frm-platillo">
-	
 	<div class="row">
 		<div class="form-group col-sm-4">
 			<label for="txtNumero">Número</label>
