@@ -39,6 +39,16 @@
 	    </div>
     </div>
 </script>
+<script type="text/x-jQuery-tmpl" id="cantidad-tmpl">
+	<div class="container-fluid">
+		<div class="form-group">
+			<label for="txtCantidadTotal" class="col-xs-2">Cantidad</label>
+			<div class="col-xs-8">
+				<input type="text" class="form-control" id="txtCantidadTotal" name="txtCantidadTotal">
+			</div>
+		</div>
+	</div>
+</script>
 <script type="text/x-jQuery-tmpl" id="platillo-tmpl">
 	<div class="container-fluid">
 		<form id="frm-platillo">

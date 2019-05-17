@@ -1,3 +1,7 @@
+<?php 
+	$puedeAtender = $this->session->extempo['idPerfil'] == getIdPerfil("Cocina");
+	$puedeAtender |= $this->session->extempo['idPerfil'] == getIdPerfil("Administrador");
+?>
 <script>
 	Array.prototype.remove = function (element) {
 		let index = this.indexOf(element)
@@ -55,12 +59,16 @@
 				'entregadas',
 				'pagadas'
 			],
+			btnPreparar = {
+				1: "<button type='button' class='btn btn-sm btn-primary btn-listo' title='Listo'><i class='fas fa-check'></i></button>",
+				3: "<span class='label label-success'>Listo<span>"
+			},
 			comandasList = {nuevas: [], preparadas: [], entregadas: [], pagadas: [], rechazadas: []},
 			trNoDetalle = '<tr><td colspan="5" class="text-muted text-center"><h4>Selecciona una comanda</h4></td></tr>';
 		<?php if ($this->session->extempo['idPerfil'] == getIdPerfil("Caja")): ?>
 			let actionBnts = [
 				"<button disabled='true' type='button' id='btn-pagar' class='btn btn-success'>Pagar</button>",
-				"<button disabled='true' type='button' id='btn-limpiar' data-type='clean' class='btn btn-defualt'>Limpiar</button>"
+				"<button disabled='true' type='button' id='btn-limpiar' data-type='clean' class='btn btn-default'>Limpiar</button>"
 			];
 		<?php elseif ($this->session->extempo['idPerfil'] == getIdPerfil("Mesero")): ?>
 			let actionBnts = [
@@ -106,10 +114,8 @@
 							.append("<td class='cantidad'>" + detalle.cantidad + "</td>")
 							.append("<td class='precio'>" + detalle.precio + "</td>")
 							.append("<td class='subtotal'>" + (detalle.cantidad * detalle.precio) + "</td>")
-							<?php if ($this->session->extempo['idPerfil'] == getIdPerfil("Administrador") ||
-									$this->session->extempo['idPerfil'] == getIdPerfil("Cocina")): ?>
-								.append("<td><button type='button' class='btn btn-sm btn-primary btn-listo' title='Listo'>" + 
-											"<i class='fas fa-check'></i></button></td>")
+							<?php if ( $puedeAtender ): ?>
+								.append("<td>" + btnPreparar[detalle.status] + "</td>")
 							<?php endif; ?>
 						)
 				}
@@ -302,15 +308,17 @@
 						if (res) {
 							$.ajax({
 								url: base_url + "comandas/preparar/" + comanda.id,
-								success: function ( res ) {
+								success: function ( answ ) {
 									try {
-										res = JSON.parse(res)
-										if (res.code == 1) {
+										answ = JSON.parse(answ)
+										if (answ.code == 1) {
 											delComanadList(comanda)
-											comanda.status = 2 //Status comanda atendia
+											comanda.status = 2 //Status comanda preparada
+											for (detalle of comanda.detalles)
+												detalle.status = 3
 											addComandaList(comanda)
 										}
-										else if (res.code == 0) {
+										else if (answ.code == 0) {
 											errorDialog("Error al Preparar la comanda")
 										}
 									}
@@ -331,30 +339,45 @@
 			if (comanda) {
 				BootstrapDialog.confirm({
 					title: "Pagar",
-					message: "Se pagara la comanda de la <strong>mesa " + comanda.id_mesa + "</strong>",
+					message: $("#cantidad-tmpl").tmpl(),
 					type: BootstrapDialog.TYPE_PRIMARY,
 					btnOKLabel: "Aceptar",
 					btnOKClass: "btn-primary",
 					btnCancelLabel: "Cancelar",
 					callback: function ( res ) {
 						if (res) {
-							$.ajax({
-								url: base_url + "comandas/pagar/" + comanda.id,
-								success: function ( res ) {
-									try {
-										res = JSON.parse(res)
-										if (res.code == 1) {
-											delComanadList(comanda)
-											comanda.status = 3 //Status comanda pagada
-											addComandaList(comanda)
+							let cantidad = parseFloat($("#txtCantidadTotal").val()),
+								total = parseFloat(comanda.total)
+							if (isNaN(cantidad) || cantidad < total) {
+								errorDialog("La cantidad ingresada no es válida")
+							}
+							else {
+								$.ajax({
+									url: base_url + "comandas/pagar/" + comanda.id,
+									success: function ( answ ) {
+										try {
+											answ = JSON.parse(answ)
+											if (answ.code == 1) {
+												delComanadList(comanda)
+												comanda.status = 4 //Status comanda pagada
+												addComandaList(comanda)
+												BootstrapDialog.alert({
+													title: "Éxito",
+													message: "Comanda pagada, cambio: <strong>" + 
+														(cantidad - total) + 
+														"</strong>",
+													type: BootstrapDialog.TYPE_SUCCESS,
+													size: BootstrapDialog.SIZE_SMALL
+												})
+											}
+											else if (answ.code == 0) {
+												errorDialog("Error al pagar la comanda")
+											}
 										}
-										else if (res.code == 0) {
-											errorDialog("Error al pagar la comanda")
-										}
+										catch ( e ) { console.error(e) }
 									}
-									catch ( e ) { console.error(e) }
-								}
-							})
+								})
+							}
 						}
 					}
 				})
@@ -505,8 +528,10 @@
 					try {
 						answ = JSON.parse(answ)
 						if (answ.code == 1) {
+							pla.status = 3
+							$tr.data("detalle", pla)
 							$btn.fadeOut("slow", function () {
-								$btn.replaceWith("<span class='label label-success'>Listo<span>")
+								$btn.replaceWith(btnPreparar[pla.status])
 								$btn.fadeIn("fast")
 							})
 						}

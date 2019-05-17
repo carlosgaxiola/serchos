@@ -93,8 +93,13 @@ class Comandas extends MY_Controller {
 	public function preparar ($idComanda) {
 		$puedeAtender = $this->session->extempo['perfil'] == "Gerente" || $this->session->extempo['perfil'] == "Administrador" || $this->session->extempo['perfil'] == "Cocina";
 		if (validarAcceso(true) and $puedeAtender) {
-			$data = array("status" => 2);
-			echo json_encode(array("code" => $this->ComandasModelo->actualizar($data, $idComanda)));
+			$data['status'] = 2;
+			$answ["code"] = $this->ComandasModelo->actualizar($data, $idComanda);
+			if ($answ['code']) {
+				$data['status'] = 3;
+				$answ['code_detalle'] = $this->ComandasDetalleModelo->actualizar($data, $idComanda, 'id_comanda');
+			}
+			echo json_encode($answ);
 		}
 		else
 			show_404();
@@ -112,19 +117,21 @@ class Comandas extends MY_Controller {
 			show_404();
 	}
 	public function entregar ($idComanda) {
-		$peudeEntregar = $this->seesion->extempo['perfil'] = "Gerente" || 
-			$this->session->extempo['perfil'] == "Administrador" ||
-			$this->session->extempo['perfil'] == "Mesero";
-		if (validarAcceso(true) and $peudeEntregar) {
+		$puedeEntregar = $this->seesion->extempo['perfil'] = getIdPerfil("Gerente") || 
+			$this->session->extempo['perfil'] == getIdPerfil("Administrador") ||
+			$this->session->extempo['perfil'] == getIdPerfil("Mesero");
+		if (validarAcceso(true) and $puedeEntregar) {
 			$data['status'] = 3;
 			echo json_encode(array("code" => $this->ComandasModelo->actualizar($data, $idComanda)));
 		}
 	}
 
 	public function pagar ($idComanda) {
-		$puedePagar = $this->session->extempo['perfil'] == "Gerente" || $this->session->extempo['perfil'] == "Administrador" || $this->session->extempo['perfil'] == "Caja";
+		$puedePagar = $this->session->extempo['idPerfil'] == getIdPerfil("Gerente") ||
+			$this->session->extempo['idPerfil'] == getIdPerfil("Administrador") ||
+			$this->session->extempo['idPerfil'] == getIdPerfil("Caja");
 		if (validarAcceso(true) and $puedePagar) {
-			$data = array("status" => 3); //Status comanda pagada
+			$data['status'] = 4; //Status comanda pagada
 			echo json_encode(array("code" => $this->ComandasModelo->actualizar($data, $idComanda)));
 		}
 		else
