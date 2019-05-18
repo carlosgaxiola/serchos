@@ -12,12 +12,12 @@
             <ul class="nav navbar-nav">
                 <li class="dropdown user user-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <img src="<?php echo base_url("assets/images/usuario.png") ?>" class="user-image" alt="User Image">
+                        <img src="<?php echo base_url("assets/images/usuario.jpg") ?>" class="user-image" alt="User Image">
                         <span class="hidden-xs"><?php echo getNombreCompleto() ?></span>
                     </a>
                     <ul class="dropdown-menu">
                         <li class="user-header">
-                            <img src="<?php echo base_url("assets/images/usuario_160x160.png") ?>" class="img-circle" alt="User Image">
+                            <img src="<?php echo base_url("assets/images/usuario_160.jpg") ?>" class="img-circle" alt="User Image">
                             <p>
                                 <?php echo $this->session->nombre ?>
                                 <small><?php echo $this->session->perfil ?></small>
