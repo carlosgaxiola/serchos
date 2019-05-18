@@ -1,4 +1,13 @@
 <script>
+	var btnStatus = {
+		0: "<button type='button' class='btn btn-sm btn-success btn-status'><i class='fas fa-toggle-on'></i></button>",
+		1: "<button type='button' class='btn btn-sm btn-danger btn-status'><i class='fas fa-toggle-off'></i></button>",
+	},
+	lblStatus = {
+		1: "<span class='label label-success'>Activo</span>",
+		0: "<span class='label label-danger'>Inactivo</span>"
+	},
+	btnEdit = "<button type='button' class='btn btn-sm btn-edit btn-warning'><i class='fas fa-edit'></i></button>";
 	$(document).ready( function () {
 
 		var filas = tabla.rows().nodes(),
@@ -34,7 +43,7 @@
 			$("#form").show()
 			$("#tabla").hide()
 			$("#form-title").text("Editar " + perfil.singular.trim())
-			let usuario = $(this).parent().parent().data("usuario")
+			let $tr = $(this).parents("tr"), usuario = $tr.data("usuario")
 			$("#txtNombre").val(usuario.nombre)
 			$("#txtPaterno").val(usuario.paterno)
 			$("#txtMaterno").val(usuario.materno)
@@ -46,80 +55,41 @@
 			else
 				$("#txtStatus").html("<span class='label label-danger'>Inactivo</span>")
 			$("#frm-usuario").data("usuario", usuario);
+			$("#frm-usuario").data("node", tabla.row($tr).node());
 		})
 
 		$("#tblUsuarios").delegate(".btn-status", "click", function () {
-			let $tr = $(this).parent().parent(),
-				usuario = $tr.data("usuario");
-			if (usuario.status == 0) {
-				BootstrapDialog.confirm({
-					title: "Activar el usuario",
-					message: "¿Desea activar el usuario " + usuario.nombre + "?",
-					btnOKLabel: "Sí",
-					btnOKClass: "btn-success",
-					btnCancelLabel: "No",
-					type: BootstrapDialog.TYPE_SUCCESS,
-					callback: function (res) {
-						if (res) {
-							data = {
-								idUsuario: usuario.id,
-								status: 1
-							}
-							toggle(data, function () {
+			let $tr = $(this).parents("tr"),
+				usuario = $tr.data("usuario"),
+				nuevoStatus = usuario.status == 0 ? 1 : 0;
+			BootstrapDialog.confirm({
+				title: "Cambiar estado",
+				message: "¿Cambiar estado del usuario " + usuario.nombre + " a " + lblStatus[nuevoStatus] + "?",
+				btnOKLabel: "Sí",
+				btnOKClass: "btn-primary",
+				btnCancelLabel: "No",
+				callback: function (btn) {
+					if (btn) {
+						toggle({
+							id: usuario.id,
+							status: nuevoStatus,
+							callback: function () {
 								BootstrapDialog.alert({
 									title: "Usuario activado",
 									message: "Usuario activado con exito",
 									type: BootstrapDialog.TYPE_SUCCESS,
 									size: BootstrapDialog.SIZE_SMALL
 								})
-								$("td:eq(3)", $tr).html("<span class='label label-success'>Activo</span>")
-								$(".btn-status", $tr)
-									.removeClass("btn-success")
-									.addClass("btn-danger")
-									.prop("title", "Desactivar usuario")
-									.children("i")
-										.removeClass("fa-toggle-on")
-										.addClass("fa-toggle-off")
+								$("td:eq(7)", $tr).html(lblStatus[nuevoStatus])
+								$(".btn-status", $tr).replaceWith(btnStatus[nuevoStatus])
+								usuario.status = nuevoStatus
+								$tr.data("usuario", usuario)
 								resetForm()
-							})
-						}
-					}
-				})
-			}
-			else {
-				BootstrapDialog.confirm({
-					title: "Desactivar el usuario",
-					message: "¿Desea desactivar el usuario " + usuario.nombre + "?",
-					btnOKLabel: "Sí",
-					btnOKClass: "btn-danger",
-					btnCancelLabel: "No",
-					type: BootstrapDialog.TYPE_DANGER,
-					callback: function (res) {
-						if (res) {
-							data = {
-								idUsuario: usuario.id,
-								status: 0
 							}
-							toggle(data, function () {
-								BootstrapDialog.alert({
-									title: "Usuario desactivado",
-									message: "Usuario desactivado con exito",
-									type: BootstrapDialog.TYPE_SUCCESS,
-									size: BootstrapDialog.SIZE_SMALL
-								})
-								$("td:eq(3)", $tr).html("<span class='label label-danger'>Inactivo</span>")
-								$(".btn-status", $tr)
-									.removeClass("btn-danger")
-									.addClass("btn-success")
-									.prop("title", "Activar usuario")
-									.children("i")
-										.removeClass("fa-toggle-off")
-										.addClass("fa-toggle-on")
-							})
-						}
+						})
 					}
-				})
-			}
+				}
+			})
 		})
 
 		$("#btn-save").click( function () {
@@ -173,12 +143,12 @@
 									type: BootstrapDialog.TYPE_SUCCESS,
 									size: BootstrapDialog.SIZE_SMALL
 								})
-								let $tr = $(filas).find("td", "[data-id='" + res.msg + "']").parent()
-								$("td:eq(1)", $tr).text($("#txtNombre").val())
-								$("td:eq(2)", $tr).text($("#txtPaterno").val())
-								$("td:eq(3)", $tr).text($("#txtMaterno").val())
-								$("td:eq(4)", $tr).text($("#txtUsuario").val())
-								init("/" + res.msg)
+								let fila = $("#frm-usuario").data("node")
+								$("td:eq(1)", fila).text(res.usuario.nombre)
+								$("td:eq(2)", fila).text(res.usuario.paterno)
+								$("td:eq(3)", fila).text(res.usuario.materno)
+								$("td:eq(4)", fila).text(res.usuario.usuario)
+								$(fila).data("usuario", res.usuario)
 								$("#tabla").show()
 								$("#form").hide()
 								$("#txtContra").val("")
@@ -226,30 +196,18 @@
 						else if (res.code < 0)
 							errorDialog(res.msg)
 						else if (res.code > 0) {
-							let fecha = moment().format("DD/MM/YYYY"),
-								fila = tabla.row.add([
+							let fila = tabla.row.add([
 								tabla.rows().count() + 1,
 								$("#txtNombre").val(),
 								$("#txtPaterno").val(),
 								$("#txtMaterno").val(),
 								$("#txtUsuario").val(),
 								perfil.singular.trim(),
-								fecha,
-								"<span class='label label-success'>Activo</span>",
-								"<button type='button' class='btn btn-warning btn-sm btn-edit'><i class='fas fa-edit'></i></button>&nbsp;" +
-								"<button type='button' class='btn btn-danger btn-sm btn-status'><i class='fas fa-toggle-off'></i></button>"
+								moment().format("DD/MM/YYYY"),
+								lblStatus[1],
+								btnEdit + "&nbsp;" + btnStatus[1]
 							]).draw()
-							let usuario = {
-								id: res.msg,
-								nombre: $("#txtNombre").val(),
-								paterno: $("#txtPaterno").val(),
-								materno: $("#txtMaterno").val(),
-								usuario: $("#txtUsuario").val(),
-								id_perfil: $("#idPerfil").val(), 
-								create_at: moment(fecha).format("YYYY-MM-DD"),
-								status: 1
-							}
-							$(tabla.row(fila).node()).data("usuario", usuario)
+							$(fila.node()).data("usuario", res.usuario)
 							$("#form").hide()
 							$("#tabla").show()
 							resetForm()
@@ -268,22 +226,19 @@
 			})
 		}
 
-		function toggle (data, callback) {
+		function toggle (config) {
 			$.ajax({
 				url: base_url + "usuarios/toggle",
 				type: "POST",
-				data: data,
-				success: function ( res ) {
+				data: {id: config.id, status: config.status},
+				success: function ( answ ) {
 					try {
-						res = JSON.parse(res)
-						if (res.code)
-							callback()
-						else if (res.code)
-							errorDialog("No se pudo cambiar el estado")
-					}
-					catch ( e ) {
-						console.error(e)
-					}
+						answ = JSON.parse(answ)
+						if (answ.code == 0)
+							errorDialog(answ.msgError)
+						else if (answ.code == 1)
+							config.callback()
+					} catch ( e ) { console.error(e) }
 				}
 			})
 		}
@@ -307,13 +262,6 @@
 							else {
 								tabla.rows().remove()
 								$.each(res, function (index, usuario) {
-									let lblStatus = "<span class='label label-success'>Activo</span>",
-										btnEdit = "<button class='btn btn-warning btn-edit btn-sm'><i class='fas fa-edit'></i></button>",
-										btnStatus = "&nbsp;<button class='btn btn-danger btn-status btn-sm'><i class='fas fa-toggle-off'></i></button>";
-									if (usuario.status == 0) {
-										lblStatus = "<span class='label label-danger'>Inactivo</span>";
-										btnStatus = "<button class='btn btn-success btn-status'><i class='fas fa-toggle-on'></i></button>";
-									}
 									let fila = tabla.row.add([
 										tabla.rows().count() + 1,
 										usuario.nombre,
@@ -322,8 +270,8 @@
 										usuario.usuario,
 										perfil.singular.trim(),
 										moment(usuario.create_at).format("DD/MM/YYYY"),
-										lblStatus,
-										btnEdit + btnStatus
+										lblStatus[usuario.status],
+										btnEdit + "&nbsp;" + btnStatus[usuario.status]
 									])
 									$(tabla.row(fila).node()).children("td:first").data("id", usuario.id)
 									$(tabla.row(fila).node()).data("usuario", usuario)
@@ -350,12 +298,15 @@
 		}
 
 		function resetForm () {
-			$("#txtNombre").parent().removeClass("has-error").children("small").hide()
-			$("#txtPaterno").parent().removeClass("has-error").children("small").hide()
-			$("#txtMaterno").parent().removeClass("has-error").children("small").hide()
-			$("#txtUsuario").parent().removeClass("has-error").children("small").hide()
-			$("#txtContra").parent().removeClass("has-error").children("small").hide()
-			$("#txtConfContra").parent().removeClass("has-error").children("small").hide()
+			$("#idUsuario").val("")
+			$("#txtNombre").val("").parent().removeClass("has-error").children("small").hide()
+			$("#txtPaterno").val("").parent().removeClass("has-error").children("small").hide()
+			$("#txtMaterno").val("").parent().removeClass("has-error").children("small").hide()
+			$("#txtUsuario").val("").parent().removeClass("has-error").children("small").hide()
+			$("#txtContra").val("").parent().removeClass("has-error").children("small").hide()
+			$("#txtConfContra").val("").parent().removeClass("has-error").children("small").hide()
+			$("#frm-usuario").data("usuario", {})
+			$("#frm-usuario").data("node", "")
 		}
 
 		init()

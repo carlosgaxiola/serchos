@@ -132,6 +132,8 @@ class Usuarios extends MY_Controller {
     			if ($idUsuario) {
     				$response['code'] = 1;
     				$response['msg'] = $idUsuario;
+                    $usuario['id'] = $idUsuario;
+                    $response['usuario'] = $usuario;
     			}
     			else {
     				$response['code'] = -1;
@@ -167,6 +169,8 @@ class Usuarios extends MY_Controller {
     			if ($this->UsuariosModelo->actualizar($usuario, $where)) {
     				$response['code'] = 1;
     				$response['msg'] = $post['idUsuario'];
+                    $where['id'] = $post['idUsuario'];
+                    $response['usuario'] = $this->UsuariosModelo->buscar($where);
     			}
     			else {
     				$response['code'] = -1;
@@ -191,6 +195,24 @@ class Usuarios extends MY_Controller {
     		"txtUsuario=".form_error("txtUsuario")."&".
     		"txtContra=".form_error("txtContra")."&".
     		"txtConfContra=".form_error("txtConfContra");
+    }
+
+    public function toggle () {
+        if (validarAcceso(true)) {
+            $post = $this->input->post();
+            $where['id'] = $post['id'];
+            $data['status'] = $post['status'];
+            if ($this->UsuariosModelo->actualizar($data, $where)) {
+                $answ['code'] = 1;
+            }
+            else {
+                $answ['code'] = 0;
+                $answ['msgError'] = "Error al cambiar el estado";
+            }
+            echo json_encode($answ);
+        }
+        else
+            show_404();
     }
 
 }
