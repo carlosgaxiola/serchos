@@ -22,6 +22,8 @@
 	<script src="<?php echo base_url("assets/js/jquery.tmpl.min.js") ?>"></script>
 	<!-- TimePicker -->
 	<script src="<?php echo base_url("assets/js/bootstrap-timepicker.min.js") ?>"></script>
+	<!-- Notifit -->
+	<script src="<?php echo base_url("assets/js/notifit.min.js") ?>"></script>
 	<!-- Activar datatables -->
 	<script>			
 		var tabla = $(".datatable").DataTable({

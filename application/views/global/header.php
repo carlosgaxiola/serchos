@@ -25,6 +25,8 @@
     <link rel="stylesheet" href="<?php echo base_url("assets/css/bootstrap-datepicker.min.css") ?>">
     <!-- TimePicker -->
     <link rel="stylesheet" href="<?php echo base_url("assets/css/bootstrap-timepicker.min.css") ?>">
+    <!-- Notifit -->
+    <link rel="stylesheet" href="<?php echo base_url("assets/css/notifit.min.css") ?>">
 </head>
 <body class="hold-transition skin-red-light sidebar-mini">
 <div class="wrapper">
