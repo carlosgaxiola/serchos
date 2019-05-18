@@ -19,7 +19,12 @@
 		<main class="content-wrapper" style="min-height: 100%">
 			<section class="content">
 				<div class="login-box" style="margin-top: 0px; margin-bottom: 0px;">
-				  	<h1 style="text-align: center;">Pacheco's bar</h1>
+				  	<center>
+	                    <h1 style="text-align: center;">
+	                        <img src="<?php echo base_url("assets/images/usuario.jpg") ?>" alt="Pacheco's bar" class="img-thumbnail">
+	                    </h1>
+	                </center>
+	                <br>
 				  	<div class="login-box-body">
 				    	<p class="login-box-msg">Registro de clientes</p>
 				    	<form id="frm-registro">

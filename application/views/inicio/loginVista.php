@@ -14,14 +14,15 @@
     <!-- Bootstrap 3.3.7 -->
     <link rel="stylesheet" href="<?php echo base_url("assets/css/bootstrap-3.min.css") ?>">
 </head>
-<body class="hold-transition skin-blue sidebar-collapse" style="background: url('<?php echo base_urL("assets/images/fondo.jpg") ?>') center center !important;">
+<body class="hold-transition skin-blue sidebar-collapse">
 <div class="wrapper">    
 	<main class="content-wrapper" style="min-height: 100%">
 		<section class="content">
 			<div class="login-box" style="margin-top: 0px; margin-bottom: 0px;">
-			  	<h1 style="text-align: center;">Pacheco's bar</h1>
                 <center>
-                    <img src="<?php echo base_url("assets/images/usuario.jpg") ?>" alt="Logo" class="img-thumbnail">
+                    <h1 style="text-align: center;">
+                        <img src="<?php echo base_url("assets/images/usuario.jpg") ?>" alt="Pacheco's bar" class="img-thumbnail">
+                    </h1>
                 </center>
                 <br>
 			  	<div class="login-box-body">
