@@ -23,4 +23,4 @@ class MesasModelo extends MY_Model {
 	public function llenarHorarios ($idMesa) {
 		$this->db->query("CALL llenar_horarios_mesa('".$idMesa."')");
 	}
-}
+}	

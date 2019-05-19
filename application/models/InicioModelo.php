@@ -9,7 +9,7 @@ class InicioModelo extends MY_Model {
 		$this->view = "usuarios";
 	}
 
-	public function login ($usuario, $contra) {		
+	public function login ($usuario, $contra) {
 		$this->db->select("usu.*, per.nombre AS perfil");
 		$this->db->join("perfiles per", "per.id = usu.id_perfil");
 		$this->db->where("usuario", $usuario);

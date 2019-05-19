@@ -116,6 +116,7 @@ class Comandas extends MY_Controller {
 		else
 			show_404();
 	}
+	
 	public function entregar ($idComanda) {
 		$puedeEntregar = $this->seesion->extempo['perfil'] = getIdPerfil("Gerente") || 
 			$this->session->extempo['perfil'] == getIdPerfil("Administrador") ||
