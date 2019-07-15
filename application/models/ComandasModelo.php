@@ -23,6 +23,25 @@ class ComandasModelo extends MY_Model {
 		return false;
 	}
 
+	public function listar ($where = -1, $order = -1) {
+		date_default_timezone_set("America/Mazatlan");
+		$timestamp = new datetime();
+		$this->db->where("fecha", $timestamp->format("Y-m-d"));
+		if (is_array($where))
+			$this->db->where($where);
+		$this->db->order_by("hora");
+		$comandas = $this->db->get("listar_comandas");
+		if ($comandas->num_rows() > 0)
+			return $comandas->result_array();
+		return false;
+	}
+
+	public function canceladas 	() { return $this->listar(array("status" => 0)); }
+	public function nuevas		() { return $this->listar(array("status" => 1)); }
+	public function entregadas 	() { return $this->listar(array("status" => 2)); }
+	public function preparadas 	() { return $this->listar(array("status" => 3)); }
+	public function pagadas 	() { return $this->listar(array("status" => 4)); }
+
 	public function getDetallesComanda ($idComanda) {
 		$this->db->select("det.*, pla.nombre AS platillo");
 		$this->db->join("platillos pla", "pla.id = det.id_platillo");
@@ -66,5 +85,37 @@ class ComandasModelo extends MY_Model {
 			return "1";
 		}
 		return "0";
+	}
+
+	public function getDetalles ($idComanda) {
+		$this->db->where("id_comanda", $idComanda);
+		$detalles = $this->db->get("listar_detalle_comandas");
+		if ($detalles->num_rows() > 0)
+			return $detalles->result_array();
+		return false;
+	}
+
+	public function getDetalle ($idComanda, $idPlatillo) {
+		$this->db->where("id_comanda", $idComanda);
+		$this->db->where("id_platillo", $idPlatillo);
+		$detalle = $this->db->get("listar_detalle_comandas");
+		if ($detalle->num_rows() > 0)
+			return $detalle->row_array();
+		return false;
+	}
+
+	public function actDetalle ($detalle) {
+		$this->db->where("id_platillo", $detalle['id_platillo']);
+		$this->db->where("id_comanda", $detalle['id_comanda']);
+		$this->db->set("cantidad", $detalle['cantidad']);
+		$this->db->set("precio", $detalle['precio']);
+		$this->db->set("id_platillo", $detalle['idNuevoPlatillo']);
+		$this->db->update("detalle_comandas");
+		return ($this->db->affected_rows() > 0);
+	}
+
+	public function actComanda ($idComanda) {
+		$this->db->query("CALL actComanda($idComanda)");
+		return ($this->db->affected_rows() > 0);
 	}
 }

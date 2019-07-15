@@ -14,13 +14,25 @@ class Comandas extends MY_Controller {
 		$this->modulo = getModulo("comandas");
 	}
 
-	public function index () {
+	public function index ($filtro = null) {
 		if (validarAcceso()) {
-			$data = array( 'titulo' => "Comandas" );
+			switch ($filtro) {
+				case 	null:
+				case 	'todas': 		$comandas = $this->ComandasModelo->listar(); 		break;
+				case 	'canceladas': 	$comandas = $this->ComandasModelo->canceladas(); 	break;
+				case 	'nuevas': 		$comandas = $this->ComandasModelo->nuevas(); 		break;
+				case 	'preparadas': 	$comandas = $this->ComandasModelo->preparadas(); 	break;
+				case 	'entregadas': 	$comandas = $this->ComandasModelo->entregadas(); 	break;
+				case 	'pagadas': 		$comandas = $this->ComandasModelo->pagadas(); 		break;
+				default:				$comandas = false; 									break;
+			}
+			$data = array( 
+				'titulo' => "Comandas",
+				'comandas' => $comandas,
+				'filtro' => $filtro
+			);
 			$this->load->view("comandas/mainVista", $data);
-		}
-		else
-			show_404();
+		} else show_404();
 	}
 
 
@@ -219,5 +231,50 @@ class Comandas extends MY_Controller {
     	}
     	else
     		show_404();
+    }
+
+    public function detalle ($idComanda = null) {
+    	if (validarAcceso()) {
+    		if ($idComanda == null)
+    			$idComanda = $this->input->post("idComanda");
+    		$data = array( 
+				'titulo' => "Detalle Comanda ".$idComanda,
+				'detalles' => $this->ComandasModelo->getDetalles($idComanda)
+			);
+			$this->load->view("comanda_detalle/mainVista", $data);
+    	} else show_404();
+    }
+
+    public function platillo () {
+    	if (validarAcceso()) {
+    		$post = $this->input->post();
+    		$platillo = $this->ComandasModelo->getDetalle($post['idComanda'], $post['idPlatillo']);
+    		$data = array(
+    			'subtitulo' => "Platillo ".$platillo['platillo']." comanda ".$post['idComanda'],
+				'titulo' => "Comanda ".$post['idComanda'],
+				'platillo' => $platillo,
+				'platillos' => $this->PlatillosModelo->habilitados()
+			);
+			$this->load->view("detalle_platillo/mainVista", $data);
+    	} else show_404();
+    }
+
+    public function actualizaplatillo () {
+    	if (validarAcceso()) {
+    		$post = $this->input->post();
+    		$detalle = array(
+    			'id_comanda' => $post['idComanda'],
+    			'id_platillo' => $post['idPlatillo'],
+    			'cantidad' => $post['cantidad'],
+    			'precio' => $post['precio'],
+    			'idNuevoPlatillo' => $post['cmbPlatillos']
+    		);
+    		$this->ComandasModelo->trans_start();
+    		$this->ComandasModelo->actDetalle($detalle);
+    		$this->ComandasModelo->actComanda($post['idComanda']);
+    		if (!$this->ComandasModelo->trans_end())
+    			$this->session->set_flashdata("error", "Error al modificar platillo");
+    		redirect("comandas/detalle/".$post['idComanda']);
+    	} else show_404();
     }
 }

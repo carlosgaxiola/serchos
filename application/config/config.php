@@ -23,7 +23,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://localhost/extempo8/';
+$config['base_url'] = 'http://localhost/serchos/';
+// $config['base_url'] = 'http://examen.searvices.com.mx';
 
 /*
 |--------------------------------------------------------------------------

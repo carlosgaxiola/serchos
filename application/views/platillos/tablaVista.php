@@ -4,7 +4,7 @@
 	</div>	
 </div>
 <div class="clear">&nbsp;</div>
-<div class="container-fluid"  style="background-color: white; padding: 1%;">
+<div class="container-fluid">
 	<table id="tblPlatillos" class="table table-responsive table-bordered table-striped table-hover datatable">
 		<thead>
 			<th>#</th>

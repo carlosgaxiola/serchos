@@ -9,7 +9,7 @@
 	    	this.splice(index, 1)
 	}
 
-	function buscarPlatillo ( nombre = '' ) {
+	var buscarPlatillo = function ( nombre = '' ) {
 		$.ajax({
 			url: "comandas/buscar/" + nombre,
 			success: function ( res ) {
@@ -37,7 +37,7 @@
 		})
 	}
 
-	function sugerirPrecio (platillo) {
+	var sugerirPrecio = function (platillo) {
 		let precio = $("#platillos option[value='" + platillo + "']").data("precio");
 		if (precio)
 			$("#txtPrecio").siblings("small").show().html("Sugerido: <strong>" + precio + "</strong>")
@@ -103,7 +103,7 @@
 		for (let index in actionBnts)
 			$("#default-buttons .form-group").append(!isNaN(index)?actionBnts[index] + "&nbsp;":'')
 
-		function setDetalles (comanda) {
+		var setDetalles = function (comanda) {
 			if (comanda && comanda.detalles) {
 				$("#tbl-detalle tbody").empty()
 				for (let detalle of comanda.detalles) {
@@ -540,7 +540,7 @@
 			})
 		})
 
-		function validarDetalles (detalles) {
+		var validarDetalles = function (detalles) {
 			let comanda = $("#tabla-detalle-comanda").data("comanda")
 			if (detalles) {
 				let noValidos = [];
@@ -576,7 +576,7 @@
 				errorDialog("Detalles no válidos")
 		}
 
-		function getPlatillos () {
+		var getPlatillos = function () {
 			$.ajax({
 				url: base_url + "comandas/platillos",
 				success: function ( res ) {
@@ -589,7 +589,7 @@
 			})
 		}
 
-		function addComandaList (comanda) {
+		var addComandaList = function (comanda) {
 			if (comanda) {
 				let tmpl = $("#comanda-tmpl").tmpl()
 				tmpl.find("#bg-comanda").addClass(comandasBgs[comanda.status])
@@ -614,7 +614,7 @@
 				throw "Error, comanda no válida";
 		}
 
-		function delComanadList (comandaDel) {
+		var delComanadList = function (comandaDel) {
 			let comandas = $("#" + comandasGroups[comandaDel.status] + " .comanda").toArray(),
 				totalComandas = comandas.length;
 			if (totalComandas > 0) {
@@ -634,7 +634,7 @@
 			}
 		}
 
-		function init () {
+		var init = function () {
 			$.ajax({
 				url: base_url + "comandas/data",
 				data: { fecha: moment().format("YYYY-MM-DD") },
@@ -651,9 +651,9 @@
 					}
 				}
 			})
-		}
+		}()
 
-		function refreshComandas (comandas) {
+		var refreshComandas = function (comandas) {
 			if (comandas) {
 				for (let index in comandas) {
 					if (!isNaN(index)) {
@@ -672,11 +672,12 @@
 				throw "Error las comandas no son validas";
 		}
 
-		init()
-		buscarPlatillo()
-		getPlatillos()
+		// buscarPlatillo()
+		// getPlatillos()
 
 		// $("#btn-act").click(function () { init() })
-		setInterval(init, 1000 * 5)
+		// setInterval(init, 1000 * 5)
+
 	})
+	var filtrar = function (btn) { window.location.href = base_url + "comandas/index/" + btn.value }
 </script>

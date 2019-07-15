@@ -21,9 +21,29 @@ if (!function_exists("getModulo")) {
         return $modulo;
     }
 }
+if (!function_exists("menuHorizontal")) {
+    function menuHorizontal ($modulos) {
+        if (is_array($modulos)) {
+            foreach ($modulos as $modulo):
+                if (isset($modulo['hijos']) and $modulo['hijos'] != false): ?>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <?php echo $modulo['nombre'] ?>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <?php foreach ($modulo['hijos'] as $hijo): ?>
+                                <li><a href="<?php echo base_url($hijo['url']) ?>"><?php echo $hijo['nombre'] ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </li>
+                <?php endif;
+            endforeach;
+        }
+    }
+}
 
 if (!function_exists("menu")) {
-	function menu ($modulos) {    
+	function menu ($modulos) {
 		if (is_array($modulos)) {            
 		    foreach ($modulos as $modulo): ?> 
                 <?php if (isset($modulo['hijos']) and $modulo['hijos'] != false): ?>
@@ -127,4 +147,4 @@ if (!function_exists("desencriptar_AES")) {
         mcrypt_module_close($td);
         return $decrypted;
     }
-} 
+}

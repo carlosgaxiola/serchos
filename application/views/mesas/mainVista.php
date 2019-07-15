@@ -1,7 +1,6 @@
 <?php $this->load->view("global/header") ?>
 <?php $this->load->view("global/navbar") ?>
-<?php $this->load->view("global/aside") ?>
-<main class="content-wrapper">
+<main class="content-wrapper no-aside">
 	<section class="content" id="tabla">
 		<?php $this->load->view("mesas/tablaVista") ?>
 	</section>

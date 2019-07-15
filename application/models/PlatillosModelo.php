@@ -26,4 +26,12 @@ class PlatillosModelo extends MY_Model {
             return $platillos->result_array();
         return false;
     }
+
+    public function habilitados () {
+        $this->db->where("status", 1);
+        $platillos = $this->db->get("platillos");
+        if ($platillos->num_rows() > 0)
+            return $platillos->result_array();
+        return false;
+    }
 }

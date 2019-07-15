@@ -78,5 +78,5 @@ class MY_Model extends CI_Model {
 
 	public function trans_commit () {
 		$this->db->trans_commit();
-	}	
+	}
 }

@@ -217,8 +217,8 @@
 												type: BootstrapDialog.TYPE_PRIMARY,
 												size: BootstrapDialog.SIZE_SMALL
 											})
-											$tr.children("td:eq(6)").html(lblStatus[0])
-											$tr.children("td:eq(7)").empty()
+											$tr.children("td:eq(7)").html(lblStatus[0])
+											$tr.children("td:eq(8)").empty()
 										}
 										else if (answ.code == 0) {
 											errorDialog(answ.msg)
