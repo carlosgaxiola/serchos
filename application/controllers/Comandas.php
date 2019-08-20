@@ -32,9 +32,8 @@ class Comandas extends MY_Controller {
 				'filtro' => $filtro
 			);
 			$this->load->view("comandas/mainVista", $data);
-		} else show_404();
+		} else redirect(base_url());
 	}
-
 
 	public function data () {
 		if (validarAcceso(true)) {
@@ -42,7 +41,7 @@ class Comandas extends MY_Controller {
 			echo json_encode($this->ComandasModelo->getComandas($post['fecha']));
 		}
 		else {
-			show_404();
+			redirect(base_url());
 		}
 	}
 
@@ -51,7 +50,7 @@ class Comandas extends MY_Controller {
 	}
 
 	public function actualizar () {
-		$puedeEditar = $this->session->extempo['perfil'] == "Gerente" || $this->session->extempo['perfil'] == "Administrador";
+		$puedeEditar = $this->session->serchos['perfil'] == "Gerente" || $this->session->serchos['perfil'] == "Administrador";
 		if (validarAcceso(true) and $puedeEditar) {
 			$post = $this->input->post();
 			$res = array();
@@ -90,20 +89,26 @@ class Comandas extends MY_Controller {
 			echo json_encode($res);
 		}
 		else
-			show_404();
+			redirect(base_url());
 	}
 
-	public function rechazar ($idComanda) {
-		$puedeRechazar = $this->session->extempo['perfil'] == "Gerente" || $this->session->extempo['perfil'] == "Administrador";
+	public function cancelar ($idComanda) {
+		$puedeRechazar = $this->session->serchos['perfil'] == "Gerente" || $this->session->serchos['perfil'] == "Administrador";
 		if (validarAcceso(true) and $puedeRechazar) {
-			echo json_encode(array("code" => $this->ComandasModelo->rechazar($idComanda)));
+			$answ['code'] = 0;
+			$answ['msg'] = "La comanda no pudo ser cancelada.";
+			if ($this->ComandasModelo->cancelar($idComanda)) {
+				$answ['code'] = 1;
+				$answ['msg'] = "La comanda fue cancelada.";
+			}
+			echo json_encode($answ);
 		}
 		else
-			show_404();
+			redirect(base_url());
 	}
 
 	public function preparar ($idComanda) {
-		$puedeAtender = $this->session->extempo['perfil'] == "Gerente" || $this->session->extempo['perfil'] == "Administrador" || $this->session->extempo['perfil'] == "Cocina";
+		$puedeAtender = $this->session->serchos['perfil'] == "Gerente" || $this->session->serchos['perfil'] == "Administrador" || $this->session->serchos['perfil'] == "Cocina";
 		if (validarAcceso(true) and $puedeAtender) {
 			$data['status'] = 2;
 			$answ["code"] = $this->ComandasModelo->actualizar($data, $idComanda);
@@ -114,41 +119,42 @@ class Comandas extends MY_Controller {
 			echo json_encode($answ);
 		}
 		else
-			show_404();
+			redirect(base_url());
 	}
 
 	public function listo ($idComanda, $idPlatillo) {
-		$puedePreparar = $this->session->extempo['idPerfil'] == getIdPerfil("Administrador") ||
-			$this->session->extempo['idPerfil'] == getIdPerfil("Cocina");
+		$puedePreparar = $this->session->serchos['idPerfil'] == getIdPerfil("Administrador") ||
+			$this->session->serchos['idPerfil'] == getIdPerfil("Cocina");
 		if (validarAcceso(true) and $puedePreparar) {
 			$data['status'] = 3;
 			$where = array("id_comanda" => $idComanda, 'id_platillo' => $idPlatillo);
 			echo json_encode(array("code" => $this->ComandasDetalleModelo->actualizar($data, $where)));
 		}
 		else
-			show_404();
+			redirect(base_url());
 	}
 	
 	public function entregar ($idComanda) {
-		$puedeEntregar = $this->seesion->extempo['perfil'] = getIdPerfil("Gerente") || 
-			$this->session->extempo['perfil'] == getIdPerfil("Administrador") ||
-			$this->session->extempo['perfil'] == getIdPerfil("Mesero");
+		$puedeEntregar = $this->seesion->serchos['perfil'] = getIdPerfil("Gerente") || 
+			$this->session->serchos['perfil'] == getIdPerfil("Administrador") ||
+			$this->session->serchos['perfil'] == getIdPerfil("Mesero");
 		if (validarAcceso(true) and $puedeEntregar) {
 			$data['status'] = 3;
 			echo json_encode(array("code" => $this->ComandasModelo->actualizar($data, $idComanda)));
 		}
 	}
 
-	public function pagar ($idComanda) {
-		$puedePagar = $this->session->extempo['idPerfil'] == getIdPerfil("Gerente") ||
-			$this->session->extempo['idPerfil'] == getIdPerfil("Administrador") ||
-			$this->session->extempo['idPerfil'] == getIdPerfil("Caja");
+	public function cobrar ($idComanda) {
+		$puedePagar = $this->session->serchos['idPerfil'] == getIdPerfil("Gerente") ||
+			$this->session->serchos['idPerfil'] == getIdPerfil("Administrador") ||
+			$this->session->serchos['idPerfil'] == getIdPerfil("Caja");
 		if (validarAcceso(true) and $puedePagar) {
 			$data['status'] = 4; //Status comanda pagada
-			echo json_encode(array("code" => $this->ComandasModelo->actualizar($data, $idComanda)));
+			$answ['code'] = $this->ComandasModelo->actualizar($data, $idComanda);
+			echo json_encode($answ);
 		}
 		else
-			show_404();
+			redirect(base_url());
 	}
 
 	private function formValidation ($esPlatillo = false) {
@@ -182,7 +188,7 @@ class Comandas extends MY_Controller {
             echo json_encode($this->PlatillosModelo->listar($where));
         }
         else
-            show_404();
+            redirect(base_url());
     }
 
     public function buscar ($nombrePlatillo = '') {
@@ -191,7 +197,7 @@ class Comandas extends MY_Controller {
             echo json_encode($this->PlatillosModelo->like($nombrePlatillo));
         }
         else
-            show_404();
+            redirect(base_url());
     }
 
     public function addDetalle () {
@@ -230,7 +236,7 @@ class Comandas extends MY_Controller {
     		echo json_encode($res);
     	}
     	else
-    		show_404();
+    		redirect(base_url());
     }
 
     public function detalle ($idComanda = null) {
@@ -239,10 +245,11 @@ class Comandas extends MY_Controller {
     			$idComanda = $this->input->post("idComanda");
     		$data = array( 
 				'titulo' => "Detalle Comanda ".$idComanda,
-				'detalles' => $this->ComandasModelo->getDetalles($idComanda)
+				'detalles' => $this->ComandasModelo->getDetalles($idComanda),
+				'comanda' => $this->ComandasModelo->getComanda($idComanda)
 			);
 			$this->load->view("comanda_detalle/mainVista", $data);
-    	} else show_404();
+    	} else redirect(base_url());
     }
 
     public function platillo () {
@@ -256,7 +263,7 @@ class Comandas extends MY_Controller {
 				'platillos' => $this->PlatillosModelo->habilitados()
 			);
 			$this->load->view("detalle_platillo/mainVista", $data);
-    	} else show_404();
+    	} else redirect(base_url());
     }
 
     public function actualizaplatillo () {
@@ -275,6 +282,15 @@ class Comandas extends MY_Controller {
     		if (!$this->ComandasModelo->trans_end())
     			$this->session->set_flashdata("error", "Error al modificar platillo");
     		redirect("comandas/detalle/".$post['idComanda']);
-    	} else show_404();
+    	} else redirect(base_url());
+    }
+
+    public function borrarplatillo ($idComanda, $idPlatillo) {
+    	if (validarAcceso()) {
+    		$this->ComandasDetalleModelo->delDetalle($idComanda, $idPlatillo);
+    		redirect(base_url("index.php/comandas/detalle/").$idComanda);
+    	} else {
+    		redirect(base_url());
+    	}
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo "Pacheco's | ".$titulo ?></title>  
+    <title><?php echo "Serchos's | ".$titulo ?></title>  
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="<?php echo base_url("assets/css/fontawesome.package.min.css") ?>">  
@@ -42,7 +42,7 @@
 	            <div class="alert alert-danger" hidden>
 	            	El usuario y/o contraseña son incorrectos
 	            </div>
-	            <form id="frm-login" class="frm">
+	            <form id="frm-registro" class="frm">
 	                <div class="row">
 			    		<div class="col-xs-6">
 			    			<div class="form-group has-feedback">
@@ -106,14 +106,7 @@
 	    </div>
 	</div>
 </body>
-<!-- jQuery 3 -->
-<script src="<?php echo base_url("assets/js/jquery-3.min.js") ?>"></script>
-<!-- Bootstrap 3.3.7 -->
-<script src="<?php echo base_url("assets/js/bootstrap-3.min.js") ?>"></script>	
-<!-- BootstrapDialog -->
-<script src="<?php echo base_url("assets/js/bootstrap-dialog.min.js") ?>"></script>	
-<!-- SHA1 -->
-<script src="<?php echo base_url("assets/js/sha1-jshash.js") ?>"></script>
+<?php $this->load->view("global/footer") ?>
 <!-- Inicio JS -->
 <script>
 	

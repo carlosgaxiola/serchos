@@ -20,8 +20,8 @@ class Inicio extends CI_Controller {
 			'titulo' => "Inicio",
 			'actual' => $this->modulo
 		);
-		if (isset($this->session->extempo) and $this->session->extempo['login']) {
-			switch ($this->session->extempo['perfil']) {
+		if (isset($this->session->serchos) and $this->session->serchos['login']) {
+			switch ($this->session->serchos['perfil']) {
 				case "Mesero":
 				case "Cocina":
 				case "Caja":
@@ -38,12 +38,12 @@ class Inicio extends CI_Controller {
 			}
 		}
 		else {
-			$extempo = array(
+			$serchos = array(
 				'idPerfil' => 0,
 				'login' => false
 			);			
 			$data['titulo'] = "Login";
-			$this->session->set_userdata(array('extempo' => $extempo));
+			$this->session->set_userdata(array('serchos' => $serchos));
 			$this->load->view("inicio/loginVista", $data);
 		}
 	}
@@ -61,7 +61,7 @@ class Inicio extends CI_Controller {
 				$respuesta['msg'] = "incorrecto";
 			}
 			else {
-				$extempo = array(
+				$serchos = array(
 					'nombre' => $usuario["nombre"],
 					'idUsuario' => $usuario["id"],
 					'paterno' => $usuario['paterno'],
@@ -75,7 +75,7 @@ class Inicio extends CI_Controller {
 					'status' => $usuario['status'],
 					'login' => true
 				);
-				$this->session->set_userdata(array('extempo' => $extempo));
+				$this->session->set_userdata(array('serchos' => $serchos));
 				$respuesta['msg'] = "correcto";
 			}
 		}
@@ -92,7 +92,7 @@ class Inicio extends CI_Controller {
 	}
 
 	public function registro () {
-		if (isset($this->session->extempo['login'])) {
+		if (isset($this->session->serchos['login'])) {
 			$data = array(
 				'titulo' => "Registro"
 			);
@@ -146,6 +146,6 @@ class Inicio extends CI_Controller {
 			}
 		}
 		else
-			show_404();
+			redirect(base_url());
 	}
 }

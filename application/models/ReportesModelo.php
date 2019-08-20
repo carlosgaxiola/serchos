@@ -10,12 +10,10 @@ class ReportesModelo extends MY_Model {
 	}
 	
 	public function platillos ($fecha = '') {
-		date_default_timezone_set('America/Mazatlan');
-		$fecha = new datetime($fecha);
 		$this->db->select("pla.*, SUM(cantidad) AS cantidad");
 		$this->db->join("detalle_comandas det", "det.id_platillo = pla.id");
 		$this->db->join("comandas com", "com.id = det.id_comanda");
-		$this->db->where("com.fecha = DATE('".$fecha->format("Y-m-d")."')");
+		$this->db->where("com.fecha = DATE('".$fecha."')");
 		$this->db->group_by("pla.id");
 		$platillos = $this->db->get("platillos pla");
 		if ($platillos->num_rows() > 0)
@@ -23,24 +21,13 @@ class ReportesModelo extends MY_Model {
 		return false;
 	}
 
-	public function comandas ($inicio = '', $fin = '') {
-		date_default_timezone_set('America/Mazatlan');
-		if (!empty($inicio) and !empty($fin)) {
-			$inicio = new datetime($inicio);
-			$this->db->where("fecha >= DATE('".$inicio->format("Y-m-d")."')");
-			$fin = new datetime($fin);
+	public function comandas ($inicio, $fin = null) {
+		$this->db->where("fecha >= DATE('" . $inicio->format("Y-m-d") . "')");
+		if ($fin != null)
 			$this->db->where("fecha <= DATE('".$fin->format("Y-m-d")."')");
-		}
-		else if (!empty($inicio) and empty($fin)) {
-			$inicio = new datetime($inicio);
-			$this->db->where("fecha = DATE('".$inicio->format("Y-m-d")."')");
-		}
-		else {
-			$this->db->where("fecha = DATE(NOW())");	
-		}
 		$this->db
 			->group_start()
-				->where("com.status", 3)
+				->where("com.status", 4)
 				->or_where("com.status", 0)
 			->group_end();
 		$this->db->join("usuarios usu", "usu.id = com.id_mesero");
@@ -48,6 +35,7 @@ class ReportesModelo extends MY_Model {
 		$this->db->select("com.*");
 		$this->db->select("CONCAT(usu.nombre, ' ', usu.paterno, ' ', usu.materno) AS mesero");
 		$this->db->select("IF(mesa.tipo_mesa = 1, 'Mesa para 2', 'Mesa para 4') AS mesa");
+		$this->db->select("IF(com.status = 0, 'Cancelado', 'Pagada') AS estado");
 		$comandas = $this->db->get("comandas com");
 		if ($comandas->num_rows() > 0)
 			return $comandas->result_array();

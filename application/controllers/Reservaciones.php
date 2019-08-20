@@ -11,78 +11,121 @@ class Reservaciones extends MY_Controller {
 		$this->load->model("ReservacionesModelo");
 		$this->load->model("UsuariosModelo");
 		$this->modulo = getModulo("reservaciones");
+		date_default_timezone_set("America/Mazatlan");
+		$this->form_validation->set_message("required", "Este campo es obligatorio");
 	}
 
 	public function index () {
-		if (validarAcceso()) {
-			$where = array("id_perfil" => getIdPerfil("Cliente"));
+		if (!validarAcceso()) {
+			redirect(base_url());
+		} else {
+			$where['fecha'] = DaTeTime::createFromFormat("d/m/Y", $this->input->post("txtFecha"));
+			if (is_bool($where['fecha']))
+				$where['fecha'] = new datetime();
+			if (getIdPerfil("Cliente") == $this->session->serchos['idPerfil'])
+				$where['id_cliente'] = $this->session->serchos['idUsuario'];
+			$dia = $where['fecha']->format("d");
+			$mes = $where['fecha']->format("m");
+			$año = $where['fecha']->format("Y");
+			$where['fecha'] = $where['fecha']->format("Y-m-d");
 			$data = array( 
+				'dia' => $dia,
+				'mes' => $mes,
+				'año' => $año,
 				'titulo' => "Reservaciones",
-				'clientes' => $this->UsuariosModelo->listar($where)
-			);
+				'reservaciones' => $this->ReservacionesModelo->listar($where)
+			);	
 			$this->load->view("reservaciones/mainVista", $data);
 		}
-		else
-			show_404();
 	}
 
-	public function add () {
-		if (validarAcceso(true)) {
-			$res = array();
-			$post = $this->input->post();
+	public function ver ($idReservacion = null) {
+		if (!validarAcceso()) {
+			redirect(base_url());
+		} else if (($reservacion = $this->esReserValida($idReservacion)) === false) {
+			$this->session->set_flashdata("error", "La reservación no es válida.");
+			redirect(base_url("index.php/reservaciones"));
+		} else {
+			$fecha = DaTeTime::createFromFormat("d/m/Y", $this->input->post("txtFecha"));
+			if (is_bool($fecha))
+				$fecha = new datetime();
+			$data = array(
+				'titulo' => "Reservaciones",
+				'reservacion' => $reservacion,
+				'metodo' => $idReservacion? "actualizar" : "insertar"
+			);
+			if (getIdPerfil("Cliente") != $this->session->serchos['idPerfil'])
+				$data['clientes'] = $this->UsuariosModelo->clientes();
+			$this->load->view("reservaciones/formVista", $data);
+		}
+	}
+
+	public function esReserValida ($idReservacion) {
+		if ($idReservacion == null)
+			return true;
+		$where['id'] = $idReservacion;
+		$res = $this->ReservacionesModelo->buscar($where);
+		if ($res !== false)
+			return $res;
+		return false;
+	}
+
+	public function insertar () {
+		if (!validarAcceso()) {
+			redirect(base_url());
+		} else if (!$this->formValidation()) {
+			$this->session->set_flashdata("error", "Corregir los errores de formulario.");
+			redirect(base_url("index.php/reservaciones/ver"));
+		} else if (!$this->isValidReser()) {
+			$this->session->set_flashdata("error", "No hay mas reservaciones disponibles.".
+				"<br>Pruebe cambiar el tipo de mesa ó la hora.");
+			redirect(base_url("index.php/reservaciones/ver"));
+		} else {
 			$fecha = DateTime::createFromFormat("d/m/Y", $post['txtFecha']);
-			if ($this->formValidation()) {
-				$reservacion = array(
-					'tipo_mesa' => $post['cmbTipoMesa'],
-					'fecha' => $post['txtFecha'],
-					'hora' => $post['cmbHora']
-				);
-				if ($this->session->extempo['idPerfil'] != getIdPerfil("Cliente"))
-					$reservacion['id_cliente'] = $post['idCliente'];
-				else
-					$reservacion['id_cliente'] = $this->session->extempo['idUsuario'];
-				$this->setFechaHora($reservacion);
-				$idHorario = $this->ReservacionesModelo->getIdHorario($reservacion);
-				if ($idHorario) {
-					$reservacion['id_hora'] = $idHorario;
-					$idReservacion = $this->ReservacionesModelo->reservar($reservacion);
-					if ($idReservacion) {
-						if (isset($post['txtCliente']) and !empty($post['txtCliente'])) {
-							$cliente = $post['txtCliente'];
-						}
-						else {
-							$cliente = $this->session->extempo['nombre']." ".
-								$this->session->extempo['paterno']." ".
-								$this->session->extempo['materno'];
-						}
-						$res['msgSuccess'] = "Reservación exitosa"
-							."<br>Reservación hecha a nombre de <strong>".$cliente."</strong>"
-							."<br>Número de reservación: <strong>".$idReservacion."</strong>";
-						$res['msg'] = $this->getFormErrors();
-						$res['code'] = 1;
-						$res['res'] = $this->ReservacionesModelo->buscar(array("id" => $idReservacion));
+			$post = $this->input->post();
+			$reservacion = array(
+				'tipo_mesa' => $post['cmbTipoMesa'],
+				'fecha' => $post['txtFecha'],
+				'hora' => $post['cmbHora']
+			);
+			if ($this->session->serchos['idPerfil'] != getIdPerfil("Cliente"))
+				$reservacion['id_cliente'] = $post['idCliente'];
+			else
+				$reservacion['id_cliente'] = $this->session->serchos['idUsuario'];
+			$this->setFechaHora($reservacion);
+			$idHorario = $this->ReservacionesModelo->getIdHorario($reservacion);
+			if ($idHorario) {
+				$reservacion['id_hora'] = $idHorario;
+				$idReservacion = $this->ReservacionesModelo->reservar($reservacion);
+				if ($idReservacion) {
+					if (isset($post['txtCliente']) and !empty($post['txtCliente'])) {
+						$cliente = $post['txtCliente'];
 					}
 					else {
-						$res['msg'] = "Error al hacer la reservacion.<br>Intente más tarde";
-						$res['code'] = -1;
+						$cliente = $this->session->serchos['nombre']." ".
+							$this->session->serchos['paterno']." ".
+							$this->session->serchos['materno'];
 					}
+					$res['msgSuccess'] = "Reservación exitosa"
+						."<br>Reservación hecha a nombre de <strong>".$cliente."</strong>"
+						."<br>Número de reservación: <strong>".$idReservacion."</strong>";
+					$res['msg'] = $this->getFormErrors();
+					$res['code'] = 1;
+					$res['res'] = $this->ReservacionesModelo->buscar(array("id" => $idReservacion));
 				}
 				else {
+					$res['msg'] = "Error al hacer la reservacion.<br>Intente más tarde";
 					$res['code'] = -1;
-					$res['msg'] = "No hay mesas disponibles<br>Seleccione otro horario o fecha";
 				}
 			}
 			else {
-				$res['msg'] = $this->getFormErrors();
-				$res['code'] = 0;
+				$res['code'] = -1;
+				$res['msg'] = "No hay mesas disponibles<br>Seleccione otro horario o fecha";
 			}
-			echo json_encode($res);
 		}
-		else 
-			show_404();
 	}
 
-	public function edit () {
+	public function actualizar () {
 		if (validarAcceso(true)) {
 			$res = array();
 			$post = $this->input->post();
@@ -94,10 +137,10 @@ class Reservaciones extends MY_Controller {
 					'fecha' => $post['txtFecha'],
 					'hora' => $post['cmbHora']
 				);
-				if ($this->session->extempo['idPerfil'] != getIdPerfil("Cliente"))
+				if ($this->session->serchos['idPerfil'] != getIdPerfil("Cliente"))
 					$reservacion['id_cliente'] = $post['idCliente'];
 				else
-					$reservacion['id_cliente'] = $this->session->extempo['idUsuario'];
+					$reservacion['id_cliente'] = $this->session->serchos['idUsuario'];
 				$this->setFechaHora($reservacion);
 				$idHorario = $this->ReservacionesModelo->getIdHorario($reservacion);
 				if ($idHorario) {
@@ -127,62 +170,24 @@ class Reservaciones extends MY_Controller {
 			echo json_encode($res);
 		}
 		else
-			show_404();
+			redirect(base_url());
 	}
 
-	private function formValidation ($esCliente = false) {
-		if ($esCliente) {
-			$this->form_validation->set_rules("txtNombre", "Nombre(s)", "trim|required|max_length[45]");
-	    	$this->form_validation->set_rules("txtPaterno", "Apellido Paterno",  "trim|required|max_length[45]");
-	    	$this->form_validation->set_rules("txtMaterno", "Apellido Materno", "trim|required|max_length[45]");
-	    	$this->form_validation->set_rules("txtUsuario", "Usuario", "trim|required|max_length[45]|is_unique[usuarios.usuario]");
-	    	$this->form_validation->set_rules("txtContra", "Contraseña", "required");
-	    	$this->form_validation->set_rules("txtConfContra", "Repetir Contraseña", "required|matches[txtContra]");
-	    	$this->form_validation->set_message("required", "El campo {field} es obligatorio");
-	    	$this->form_validation->set_message("is_unique", "El campo {field} ya existe");
-	    	$this->form_validation->set_message("matches", "El campo {field} debe coincidir con {param}");
-	    	$this->form_validation->set_message("max_length", "Máximo {param} caracteres");
-		}
-		else {
-			$idPerfil = $this->session->extempo['idPerfil'];
-			if ($idPerfil != getIdPerfil("Cliente"))
-				$this->form_validation->set_rules("txtCliente", "Cliente", "required");
-			$this->form_validation->set_rules("cmbTipoMesa", "Tipo de mesa", "required|is_natural_no_zero");
-			$this->form_validation->set_rules("txtFecha", "Fecha", "required|callback_validarFecha");
-			$this->form_validation->set_rules("cmbHora", "Hora", "required|in_list[1,2,3,4,5]");
-			$this->form_validation->set_message("required", "Este campo es obligatorio");
-			$this->form_validation->set_message("in_list", "Selecione una hora");
-			$this->form_validation->set_message("is_natural_no_zero", "Selecciona un tipo de mesa");
-		}
+	private function formValidation () {
+		$idPerfil = $this->session->serchos['idPerfil'];
+		if ($idPerfil != getIdPerfil("Cliente"))
+			$this->form_validation->set_rules("cmbCliente", "Cliente", "required|callback_validarCliente");
+		$this->form_validation->set_rules("cmbTipoMesa", "Tipo de mesa", "required|callback_validarMesa");
+		$this->form_validation->set_rules("txtFecha", "Fecha", "required|callback_validarFecha");
+		$this->form_validation->set_rules("txtHoraInicio", "Hora Inicio", "required|callback_validarHora");
+		$this->form_validation->set_rules("txtHoraFin", "Hora Fin", "required|callback_validarHora");
 		return $this->form_validation->run();
-	}
-
-	private function getFormErrors ($esCliente = false) {
-		if ($esCliente) {
-			return "txtNombre=".form_error("txtNombre")."&".
-	    		"txtPaterno=".form_error("txtPaterno")."&".
-	    		"txtMaterno=".form_error("txtMaterno")."&".
-	    		"txtUsuario=".form_error("txtUsuario")."&".
-	    		"txtContra=".form_error("txtContra")."&".
-	    		"txtConfContra=".form_error("txtConfContra");
-		}
-		else {
-			return "txtFecha=".form_error("txtFecha")."&".
-				"cmbHora=".form_error("cmbHora")."&".
-				"txtCliente=".form_error("txtCliente")."&".
-				"cmbTipoMesa=".form_error("cmbTipoMesa");
-		}
 	}
 
 	public function validarFecha ($fecha) {
 		$fecha = DateTime::createFromFormat("d/m/Y", $fecha);
-		if ($fecha->format("N") != 7) {
-			$this->form_validation->set_message("validarFecha", "Solo se puede reservar los domingos");
-			return false;
-		}
 		$valores = explode('/', $fecha->format("d/m/Y"));
 		if(count($valores) == 3 && checkdate($valores[1], $valores[0], $valores[2])){
-			date_default_timezone_set('America/Mazatlan');
 			$fechaActual = new datetime();
 			$fechaActual = strtotime($fechaActual->format("Y-m-d"));
 			$fecha = strtotime($fecha->format("Y-m-d"));
@@ -196,117 +201,29 @@ class Reservaciones extends MY_Controller {
 		return false;
 	}
 
-	public function validarHora ($hora) {
-		$horaAbierto = strtotime("09:00");
-		$horaCerrado = strtotime("19:00");
-		$hora = strtotime($hora);
-		if ($hora < $horaAbierto || $hora > $horaCerrado) {
-			$this->form_validation->set_message("validarHora", "La hora elegida no es válida");
-			return false;
-		}
-		return true;
+	public function validarCliente ($idCliente) {
+		$where['id'] = $idCliente;
+		$valid = $this->UsuariosModelo->buscar($where);
+		if (!$valid)
+			$this->form_validation->set_message("validarCliente", "El cliente ingresado no es válido.");
+		return $valid;
 	}
 
-	private function setFechaHora (&$reservacion) {
-		switch ($reservacion['hora']) {
-			case '1':
-				$reservacion['hora_inicio'] = "09:00:00";
-				$reservacion['hora_fin'] = "11:00:00";
-				break;
-			case '2':
-				$reservacion['hora_inicio'] = "11:00:00";
-				$reservacion['hora_fin'] = "13:00:00";
-				break;
-			case '3':
-				$reservacion['hora_inicio'] = "13:00:00";
-				$reservacion['hora_fin'] = "15:00:00";
-				break;
-			case '4':
-				$reservacion['hora_inicio'] = "15:00:00";
-				$reservacion['hora_fin'] = "17:00:00";
-				break;
-			case '5':
-				$reservacion['hora_inicio'] = "17:00:00";
-				$reservacion['hora_fin'] = "19:00:00";
-				break;
-		}
-		$fecha = DateTime::createFromFormat("d/m/Y", $reservacion['fecha']);
-		$reservacion['fecha'] = $fecha->format("Y-m-d");
+	public function validarHora ($idTipoHora) {
+		$valid = $this->ReservacionesModelo->isTipoHora($idTipoHora);
+		if ($valid === false)
+			$this->form_validation->set_message("validarTipoHora", "La hora seleccionada no es válida.");
+		return $valid;
 	}
 
-	private function puedoReservar ($reservacion) {
-		return $this->ReservacionesModelo->puedoReservar($reservacion);
-	}
-
-	public function addCliente () {
-		if (validarAcceso(true)) {
-			$post = $this->input->post();
-			if ($this->formValidation(true)) {
-				$cliente = array(
-					'nombre' => $post['txtNombre'],
-					'paterno' => $post['txtPaterno'],
-					'materno' => $post['txtMaterno'],
-					'usuario' => $post['txtUsuario'],
-					'contra' => $post['txtContra'],
-					'id_perfil' => getIdPerfil("Cliente")
-				);
-				$idUsuario = $this->UsuariosModelo->insertar($cliente);
-				if ($idUsuario) {
-					$res['code'] = 1;
-					$res['msg'] = $idUsuario;
-				}
-				else {
-					$res['code'] = -1;
-					$res['msg'] = "No se pudo registrar el cliente";
-				}
-			}
-			else {
-				$res['code'] = 0;
-				$res['msg'] = $this->getFormErrors(true);
-			}
-			echo json_encode($res);
-		}
-		else
-			show_404();
-	}
-
-	public function horarios () {
-		if (validarAcceso(true)) {
-			$post = $this->input->post();
-			if ($res['code'] = $this->formValidation()) {
-				$tipoMesa = $post['cmbTipoMesa'];
-				$fecha = DaTeTime::createFromFormat("d/m/Y", $post['txtFecha']);
-				$res['data'] = $this->ReservacionesModelo->horariosDisponibles($fecha->format("Y-m-d"), $tipoMesa);
-			}
-			$res['msg'] = $this->getFormErrors();
-			echo json_encode($res);
-		}
-		else
-			show_404();
-	}
-
-	public function data () {
-		if (validarAcceso(true)) {
-			$post = $this->input->post();
-			$this->form_validation->set_rules("fecha", "Fecha", "required|callback_validarFecha");
-			$this->form_validation->set_message("required", "Este campo es obligatorio");
-			if ($this->form_validation->run()) {
-				$fecha = DateTime::createFromFormat("d/m/Y", $post['fecha']);
-				$where['fecha'] = $fecha->format("Y-m-d");
-				if ($this->session->extempo['idPerfil'] == getIdPerfil("Cliente"))
-					$where['id_cliente'] = $this->session->extempo['idUsuario'];
-				$reservaciones = $this->ReservacionesModelo->listar($where);
-				$res['code'] = $reservaciones != false;
-				$res['data'] = $reservaciones;
-			}
-			else {
-				$res['code'] = 0;
-				$res['msg'] = "txtFechaFiltro=".form_error("fecha");
-			}
-			echo json_encode($res);
-		}
-		else
-			show_404();
+	public function isValidReser () {
+		$idTipoHora = $this->input->post("idTipoHora");
+		$idTipoMesa = $this->input->post("idTipoMesa");
+		$fecha = DaTeTime::createFromFormat("d/m/Y", $this->input->post("txtFecha"));
+		if (is_bool($fecha))
+			$fecha = new datetime();
+		$fecha = $fecha->format("Y-m-d");
+		return $this->ReservacionesModelo->puedoReservar($idTipoMesa, $idTipoHora, $fecha);
 	}
 
 	public function cancelar ($idReservacion) {
@@ -324,6 +241,32 @@ class Reservaciones extends MY_Controller {
 			echo json_encode($res);
 		}
 		else
-			show_404();
+			redirect(base_url());
+	}
+
+	public function verificar () {
+		if (!validarAcceso(true)) {
+			echo json_encode(array("code" => 0, "msg" => "Acceso denegado"));
+		} else if (!$this->formValidation()) {
+			echo json_encode(array("code" => -1, "msg" => "Errores de formulario."));
+		} else {
+			$fecha = DateTime::createFromFormat("d/m/Y", $this->input->post("txtFecha"));
+			if (is_bool($fecha))
+				$fecha = new datetime();
+			$horaInicio = DateTime::createFromFormat("H:i", $this->input->post("txtHoraInicio"));
+			if (is_bool($horaInicio))
+				$horaInicio = new datetime();
+			$horaFin = DateTime::createFromFormat("H:i", $this->input->post("txtHoraFin"));
+			if (is_bool($horaFin))
+				$horaFin = new datetime();
+			$data = array(
+				'idMesa' => $this->input->post("cmbTipoMesa"),
+				'horaInicio' => $horaInicio->format("H:i:s"),
+				'horaFin' => $horaFin->format("H:i:s"),
+				'fecha' => $fecha->format("Y-m-d")
+			);
+			$cantidad = $this->ReservacionesModelo->mesasDisponibles($data);
+			echo json_encode(array("code" => 1, 'cantidad' => $cantidad));
+		}
 	}
 }

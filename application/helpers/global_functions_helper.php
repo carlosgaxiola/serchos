@@ -5,7 +5,7 @@ if (!function_exists("modulos")) {
 	function modulos () {
 		$that =& get_instance();
         $that->load->model("PerfilesModulosModelo");        
-        $idPerfil = $that->session->extempo['idPerfil'];
+        $idPerfil = $that->session->serchos['idPerfil'];
 		$modulos = $that->PerfilesModulosModelo->modulosPadrePerfil($idPerfil);        
         foreach ($modulos as &$modulo)
             $modulo['hijos'] = $that->PerfilesModulosModelo->modulosHijo($modulo['id'], $idPerfil);
@@ -35,6 +35,13 @@ if (!function_exists("menuHorizontal")) {
                                 <li><a href="<?php echo base_url($hijo['url']) ?>"><?php echo $hijo['nombre'] ?></a></li>
                             <?php endforeach; ?>
                         </ul>
+                    </li>
+                <?php else: ?>
+                    <li <?php echo esModuloActual($modulo['id'])? 'class="active"': '' ?>>
+                        <a href="<?php echo base_url($modulo['url']) ?>" class="link">
+                            <i class="<?php echo $modulo['icon'] ?>"></i>
+                            <span><?php echo $modulo['nombre'] ?></span>
+                        </a>
                     </li>
                 <?php endif;
             endforeach;
@@ -76,7 +83,7 @@ if (!function_exists("validarAcceso"))  {
     function validarAcceso ($ajaxOnly = false) {
         $that =& get_instance();
         $that->load->model("PerfilesModulosModelo");
-        $idPerfil = $that->session->extempo['idPerfil'];
+        $idPerfil = $that->session->serchos['idPerfil'];
         $idModulo = $that->modulo['id'];
         $hasAccess = $that->PerfilesModulosModelo->get($idPerfil, $idModulo) != false;
         if ($ajaxOnly)
@@ -99,9 +106,9 @@ if (!function_exists("getIdPerfil")) {
 if (!function_exists("getNombreCompleto")) {
     function getNombreCompleto () {
         $that =& get_instance();
-        $fullName = $that->session->extempo['nombre']." ". 
-            $that->session->extempo['paterno']." ".
-            $that->session->extempo['materno'];
+        $fullName = $that->session->serchos['nombre']." ". 
+            $that->session->serchos['paterno']." ".
+            $that->session->serchos['materno'];
         return $fullName;
     }
 }

@@ -4,9 +4,6 @@
 	<section class="content" id="tabla">
 		<?php $this->load->view("usuarios/tablaVista") ?>
 	</section>
-	<section class="content" id="form" hidden>
-		<?php $this->load->view("usuarios/formVista") ?>
-	</section>
 </main>
 <?php $this->load->view("global/footer") ?>
 <?php $this->load->view("usuarios/scriptJS") ?>

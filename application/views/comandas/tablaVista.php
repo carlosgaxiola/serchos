@@ -46,15 +46,29 @@
 		</div>
 	</div>
 	<div class="row">
-		<table class="table table-striped table-hover">
-			<thead><th>#</th><th>Mesa</th><th># Platillos</th><th>Opciones</th></thead>
+		<table class="table table-striped table-hover" id="tbl-comandas">
+			<thead style="background-color: rgb(0, 166, 90); color: white;">
+				<th>#</th><th>Mesa</th><th>Número Platillos</th><th>Estado</th>
+				<th>Total</th><th>Observaciones</th><th>Detalles</th></thead>
 			<tbody>
 				<?php if (is_array($comandas)): ?>
 					<?php foreach ($comandas as $comanda): ?>
+						<?php
+							$estado = "";
+							switch ($comanda['status']) {
+								case 0: $estado = "Cancelada"; 	break;
+								case 1: $estado = "Nuevo"; 		break;
+								case 4: $estado = "Pagada"; 	break;
+								case 2: $estado = "Preparada"; 	break;
+							}
+						?>
 						<tr>
 							<td><?php echo $comanda['id'] ?></td>
-							<td><?php echo $comanda['mesa'] ?></td>
+							<td><?php echo $comanda['id_mesa'] ?></td>
 							<td><?php echo $comanda['num_pla'] ?></td>
+							<td><?php echo $estado ?></td>
+							<td><?php echo $comanda['total'] ?></td>
+							<td><?php echo $comanda['observaciones'] ?></td>
 							<td>
 								<form action="<?php echo base_url("index.php/comandas/detalle") ?>" 
 									method="post">

@@ -61,17 +61,33 @@
 	}
 
 	var salir = function () {
-		BootstrapDialog.confirm({
+		BootstrapDialog.show({
 			title: "Salir",
-			message: "¿Confirmar salir de la app?",
-			btnOKLabel: "Sí",
-			btnCancelLabel: "No",
-			btnOKClass: "btn-primary",
-			callback: function ( btn ) {
-				if (btn == true)
-					window.location.href = base_url + "inicio/logout";
-			}
+			message: "¿Confirmar cerrar sesión?",
+			type: BootstrapDialog.TYPE_SUCCESS,
+			size: BootstrapDialog.SIZE_SMALL,
+			buttons: [
+				{
+					label: "Sí",
+					cssClass: "btn-success",
+					action: function (dialog) {
+						window.location.href = base_url + "inicio/logout";
+					}
+				},
+				{
+					label: "No"
+				}
+			]
 		})
+	}
+
+	var success = function (msg = "La operación fue exitosa.", title = "Éxito") {
+		BootstrapDialog.alert({
+			title: title,
+			message: msg,
+			type: BootstrapDialog.TYPE_SUCCESS,
+			size: BootstrapDialog.SIZE_SMALL
+		});
 	}
 </script>
 <?php if (isset($scripts)): ?>

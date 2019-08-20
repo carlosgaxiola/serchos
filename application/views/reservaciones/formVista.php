@@ -1,130 +1,194 @@
-<script type="text/x-jQuery-tmpl" id="tmpl-frm-cliente">
-	<form id="frm-cliente">
+<?php $this->load->view("global/header") ?>
+<?php $this->load->view("global/navbar") ?>
+<main class="content-wrapper no-aside">
+	<section class="content" id="frm">
 		<div class="row">
-			<div class="form-group col-sm-4">
-				<label for="txtNombre">Nombre(s)</label>
-				<input type="text" class="form-control" id="txtNombre" name="txtNombre">
-				<small class="help-block error-box" style="display: none;"></small>
-			</div>
-			<div class="form-group col-sm-4">
-				<label for="txtPaterno">Apellido Paterno</label>
-				<input type="text" class="form-control" id="txtPaterno" name="txtPaterno">
-				<small class="help-block error-box" style="display: none;"></small>
-			</div>
-			<div class="form-group col-sm-4">
-				<label for="txtMaterno">Apellido Materno</label>
-				<input type="text" class="form-control" id="txtMaterno" name="txtMaterno">
-				<small class="help-block error-box" style="display: none;"></small>
+			<div class="col-xs-3">
+				<a class="btn btn-default" href="<?php echo base_url("index.php/reservaciones/") ?>">
+					<i class="fas fa-arrow-left"></i>
+				</a>
 			</div>
 		</div>
-		<div class="row">
-			<div class="form-group col-sm-4">
-				<label for="txtUsuario">Usuario</label>
-				<input type="text" class="form-control" id="txtUsuario" name="txtUsuario">
-				<small class="help-block error-box" style="display: none;"></small>
-			</div>
-			<div class="contraGroup">
-				<div class="form-group col-sm-4">
-					<label for="txtContra">Contraseña</label>
-					<input type="password" class="form-control" id="txtContra" name="txtContra">
-					<small class="help-block error-box" style="display: none;"></small>
-				</div>
-				<div class="form-group col-sm-4">
-					<label for="txtConfContra">Repetir Contraseña</label>
-					<input type="password" class="form-control" id="txtConfContra" name="txtConfContra">
-					<small class="help-block error-box" style="display: none;"></small>
-				</div>
-			</div>
-		</div>
-	</form>
-</script>
-<div class="col-xs-3 col-xs-offset-9">
-	<button type="button" class="btn btn-danger pull-right" id="btn-table"><i class="fas fa-times"></i></button>
-</div>
-<form id="frm-reservacion">
-	<?php 
-		$idPerfil = $this->session->extempo['idPerfil'];
-		$idPefil = $idPerfil == getIdPerfil("Recepcionista");
-		$idPefil = $idPerfil == getIdPerfil("Administrador");
-		$idPefil = $idPerfil == getIdPerfil("Gerente");
-	?>
-	<?php if ($idPerfil != false): ?>
-		<div class="row">
-			<?php if ($this->session->extempo['idPerfil'] != getIdPerfil("Cliente")): ?>
-				<div class="form-group col-sm-3">
-					<label for="txtCliente">Cliente</label>
-					<input type="text" placeholder="Selecciona un cliente" name="txtCliente" id="txtCliente" class="form-control" list="clientes-list">
-					<button type="button" class="btn btn-sm btn-primary" id="btn-add-cliente"
-						style="
-						    float: right;
-						    margin-top: -33px;
-						    margin-right: -40px;
-						">
-						<i class="fas fa-user-plus"></i>
-					</button>
-					<small class="help-block error-box"></small>
-					<datalist id="clientes-list">
-						<?php if (is_array($clientes)): ?>
-							<?php foreach ($clientes as $cliente): ?>
-								<?php 
-									$nombre = $cliente['nombre']." ".$cliente['paterno']." ".$cliente['materno']; 
-								?>
-								<option value="<?php echo $nombre ?>" data-id-cliente="<?php echo $cliente['id'] ?>">
-								</option>
-							<?php endforeach; ?>
+		<div class="clear">&nbsp;</div>
+		<form method="post" id="frm-reservacion"
+			action="<?php echo base_url("index.php/reservaciones/").$metodo ?>">
+			<?php 
+				$idPerfil = $this->session->serchos['idPerfil'];
+				$idPefil = $idPerfil == getIdPerfil("Recepcionista");
+				$idPefil = $idPerfil == getIdPerfil("Administrador");
+				$idPefil = $idPerfil == getIdPerfil("Gerente");
+				$isCliente = $this->session->serchos['idPerfil'] != getIdPerfil("Cliente");
+			?>
+			<?php if ($idPerfil != false): ?>
+				<div class="row">
+					<?php if ($isCliente): ?>
+						<!-- cmbCliente -->
+						<div class="form-group col-xs-3 <?php echo form_error("cmbCliente")? 'has-error' : '' ?>">
+							<?php 
+								$cli = $reservacion != false? $reservacion['id_cliente'] : '';
+								if (set_value("cmbCliente"))
+									$cli = set_value("cmbCliente");
+							?>
+							<label for="cmbCliente">Cliente</label>
+							<select type="text" name="cmbCliente" class="form-control">
+								<option value="0">Selecciona un cliente</option>
+								<?php if (is_array($clientes)): ?>
+									<?php foreach ($clientes as $cliente): ?>
+										<option <?php echo $cli == $cliente['id'] ? 'selected' : '' ?>
+											value="<?php echo $cliente['id'] ?>">
+											<?php 
+												echo $cliente['nombre'] .
+													" " . $cliente['paterno'] .
+													" " . $cliente['materno'];
+											?>
+										</option>
+									<?php endforeach; ?>
+								<?php endif; ?>
+							</select>
+							<?php if (form_error("cmbCliente")): ?>
+								<small class="help-block text-danger">
+									<?php echo form_error("cmbCliente") ?>
+								</small>
+							<?php endif; ?>
+						</div>
+					<?php endif; ?>
+					<!-- cmbTipoMesa -->
+					<div class="form-group col-xs-3 
+						<?php echo form_error("cmbTipoMesa")? 'has-error' : '' ?>">
+						<?php 
+							$tipo = $reservacion != false? $reservacion['tipo_mesa']: '';
+							if (set_value("cmbTipoMesa"))
+								$tipo = set_value("cmbTipoMesa");
+						?>
+						<label for="cmbTipoMesa">Tipo de mesa</label>
+						<select name="cmbTipoMesa" id="cmbTipoMesa" class="form-control">
+							<option value="0"
+								<?php echo $tipo == 0 ? 'selected' : '' ?>>
+								Selecciona un tipo de mesa
+							</option>
+							<option value="1"
+								<?php echo $tipo == 1 ? 'selected' : '' ?>>
+								Mesa para 2
+							</option>
+							<option value="2"
+								<?php echo $tipo == 2 ? 'selecteed' : '' ?>>
+								Mesa para 4
+							</option>
+						</select>
+						<?php if (form_error("cmbTipoMesa")): ?>
+							<small class="help-block text-danger">
+								<?php echo form_error("cmbTipoMesa") ?>
+							</small>
 						<?php endif; ?>
-					</datalist>
+					</div>
+					<!-- txtFecha -->
+					<div class="form-group col-xs-2
+						<?php echo form_error("txtFecha")? 'has-error' : '' ?>">
+						<?php 
+							$fecha = $reservacion != false ? $reservacion['fecha'] : '';
+							if (set_value("txtFecha"))
+								$fecha = set_value("txtFecha");
+							$fecha = new datetime($fecha);
+						?>
+						<label for="txtFecha">Fecha</label>
+						<input type="text" class="fecha form-control" 
+							name="txtFecha" id="txtFecha"
+							value="<?php echo $fecha->format('d/m/Y') ?>">
+						<?php if (form_error("txtFecha")): ?>
+							<small class="help-block text-danger">
+								<?php echo form_error("txtFecha") ?>
+							</small>
+						<?php endif; ?>
+					</div>
+				</div>
+				<div class="row">
+					<!-- txtHoraInicio -->
+					<div class="form-group col-xs-2 
+						<?php echo form_error("txtHoraInicio")? 'has-error' : '' ?>">
+						<label for="txtHoraInicio">Hora</label>
+						<?php 
+							$horaInicio = $reservacion != false? $reservacion['hora_inicio'] : '08:00:00';
+							if (set_value("txtHoraInicio"))
+								$horaInicio = set_value("txtHoraInicio");
+						?>
+						<input type="text" class="form-control hora" 
+							id="txtHoraInicio" name="txtHoraInicio" 
+							value="<?php echo $horaInicio ?>">
+						<?php if (form_error("txtHoraInicio")): ?>
+							<small class="help-block text-danger">
+								<?php echo form_error("txtHoraInicio") ?>
+							</small>
+						<?php endif; ?>
+					</div>
+					<!-- txtHoraFin -->
+					<div class="form-group col-xs-2 
+						<?php echo form_error("txtHoraFin")? 'has-error' : '' ?>">
+						<label for="txtHoraFin">Hora</label>
+						<?php 
+							$horaFin = $reservacion != false? $reservacion['hora_fin'] : '09:00:00';
+							if (set_value("txtHoraFin"))
+								$horaFin = set_value("txtHoraFin");
+						?>
+						<input type="text" class="form-control hora" 
+							id="txtHoraFin" name="txtHoraFin" 
+							value="<?php echo $horaFin ?>">
+						<?php if (form_error("txtHoraFin")): ?>
+							<small class="help-block text-danger">
+								<?php echo form_error("txtHoraFin") ?>
+							</small>
+						<?php endif; ?>
+					</div>
+					<!-- Cantidad Mesas -->
+					<div class="form-group col-xs-5
+						<?php echo form_error("txtCantidad")? 'has-error':'' ?>">
+						<div class="col-xs-4">
+							<label for="txtCantidad">Cantidad Mesas</label>
+							<?php 
+								$cantidad = $reservacion != false? $reservacion['cantidad'] : '1';
+								if (set_value("txtCantidad"))
+									$cantidad = set_value("txtCantidad");
+							?>
+							<input type="text" class="form-control"
+								id="txtCantidad" name="txtCantidad"
+								value="<?php echo $cantidad ?>">
+						</div>
+						<div class="col-xs-6">
+							<h3 class="text-muted" style="margin-top:11%;"
+								id="cantidad-sugerida">
+								0 disponibles
+							</h3>
+						</div>
+						<?php if (form_error("txtCantidad")): ?>
+							<small class="help-block text-danger">
+								<?php echo form_error("txtCantidad") ?>
+							</small>
+						<?php endif; ?>
+					</div>
 				</div>
 			<?php endif; ?>
-			<div class="form-group col-sm-3" style="margin-left: 20px;">
-				<label for="cmbTipoMesa">Tipo de mesa</label>
-				<select name="cmbTipoMesa" id="cmbTipoMesa" class="form-control">
-					<option value="0">Selecciona un tipo de mesa</option>
-					<option value="1">Mesa para 2</option>
-					<option value="2">Mesa para 4</option>
-				</select>
-				<small class="help-block error-box" style="display: none;"></small>
-			</div>
-			<div class="form-group col-sm-2">
-				<label for="txtFecha">Fecha</label>
-				<input type="text" class="fecha form-control" name="txtFecha" id="txtFecha">
-				<small class="help-block error-box" style="display: none;"></small>
-			</div>
-			<div class="form-group col-sm-3">
-				<label for="txtHora">Hora</label>
-				<select name="cmbHora" id="cmbHora" class="form-control">
-					<option value="0">Selecciona un hora</option>
-					<option value="1">09:00:00 - 11:00:00</option>
-					<option value="2">11:00:00 - 13:00:00</option>
-					<option value="3">13:00:00 - 15:00:00</option>
-					<option value="4">15:00:00 - 17:00:00</option>
-					<option value="5">17:00:00 - 19:00:00</option>
-				</select>
-				<small class="help-block error-box" style="display: none;"></small>
-			</div>
-		</div>
-	<?php endif; ?>
-	<div class="row">
-		<div class="col-xs-4">
-			<button type="button" class="btn btn-primary" id="btn-horarios">Horarios disponibles</button>
-			<button type="button" data-type="save" class="btn btn-success" id="btn-save">Reservar</button>
-			<button type="button" class="btn btn-default" id="btn-clean">Limpiar</button>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-xs-6" id="horarios-group" style="display: none;">
 			<div class="row">
-				<div class="col-xs-6">
-					<h3>Fecha: <strong><span id="fecha-res"></span></strong></h3>
+				<div class="col-xs-2">
+					<button onclick="verificar()" type="button" class="btn btn-primary">
+						Verificar disponibilidad
+					</button>
 				</div>
-				<div class="col-xs-6">
-					<h3>Mesa: <strong><span id="mesa-res"></span></strong></h3>
+				<div class="col-xs-2">
+					<?php 
+						if ($metodo == "actualizar") {
+							$class = "btn-warning";
+							$text = "Modificar";
+						} else {
+							$class = "btn-success";
+							$text = "Reservar";
+						}
+					?>
+					<button type="submit" class="btn <?php echo $class ?>" disabled="true">
+						<?php echo $text ?>
+					</button>
 				</div>
 			</div>
-			<table id="tblHoras" class="table table-responsive table-striped" style="background-color: white;">
-				<thead><th>Hora Inicio</th><th>Hora Fin</th><th>Mesas</th></thead>
-				<tbody></tbody>
-			</table>
-		</div>
-	</div>
-</form>
+		</form>
+	</section>
+</main>
+<?php $this->load->view("global/footer") ?>
+<?php $this->load->view("reservaciones/scriptJS") ?>

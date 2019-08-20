@@ -18,109 +18,100 @@ class Platillos extends CI_Controller {
         $this->session->set_tempdata("idModuloActual", $this->modulo['id'] , 60);
     }
 
-    public function index () {
-        if (validarAcceso()) {
+    public function index ($filtro = "todos") {
+        if (!validarAcceso()) {
+            redirect(base_url());
+        } else {
+            if ($filtro == "activos") {
+                $where['status'] = 1;
+            } else if ($filtro == "inactivos") {
+                $where['status'] = 0;
+            } else {
+                $where = null;
+            }
             $data = array(
                 'titulo' => $this->modulo['nombre'],
-                'platillos' => $this->PlatillosModelo->listar()
+                'platillos' => $this->PlatillosModelo->listar(),
+                'filtro' => $filtro
             );
             $this->load->view("platillos/mainVista", $data);
         }
-        else
-            show_404();
     }
 
-    public function add () {
-        if (validarAcceso() and $this->input->is_ajax_request()) {
+    public function agregar () {
+        if (!validarAcceso()) {
+            redirect(base_ur());
+        } else {
+            $data = array(
+                'titulo' => "Platillos",
+                'metodo' => "insertar"
+            );
+            $this->load->view("platillos/formVista", $data);
+        }
+    }
+
+    public function insertar () {
+        if (!validarAcceso()) {
+            redirect(base_url());
+        } else if (!$this->form_validation()) { 
+            $this->session->set_flashdata("error", "Corregir los errores del formulario.");
+            redirect(base_url("index.php/platillos/agregar"));
+        } else {
             $post = $this->input->post();
-            date_default_timezone_set("America/Mazatlan");
             $fecha = new datetime();
-            $response = array();
-            if ($this->form_validation()) {
-                $platillo = array(
-                    'nombre' => $post['txtNombre'],
-                    'precio' => $post['txtPrecio'],
-                    'status' => 1,
-                    'create_at' => $fecha->format("Y-m-d")
-                );
-                $idPlatillo = $this->PlatillosModelo->insertar($platillo);
-                if ($idPlatillo) {
-                    $response['code'] = 1;
-                    $response['msg'] = $idPlatillo;
-                }
-                else {
-                    $response['code'] = -1;
-                    $response['msg'] = "No se pudo guardar el platillo";
-                    $platillo['id'] = $idPlatillo;
-                    $response['platillo'] = $platillo;
-                }
+            $platillo = array(
+                'nombre' => $post['txtNombre'],
+                'precio' => $post['txtPrecio'],
+                'status' => 1,
+                'create_at' => $fecha->format("Y-m-d")
+            );
+            if ($this->PlatillosModelo->insertar($platillo) === false) {
+                $this->session->set_flashdata("error", "No se pudo insertar el platillo.");
+            } else {
+                $this->session->set_flashdata("success", "El platillo fue insertado.");
             }
-            else {
-                $response['code'] = 0;
-                $response['msg'] = $this->get_erorr_message();
-            }
-            echo json_encode($response);
+            redirect(base_url("index.php/platillos"));
         }
-        else
-            show_404();
     }
 
-    public function edit () {
-        if (validarAcceso(true)) {
+    public function editar ($idPlatillo = null) {
+        if (!validarAcceso()) {
+            redirect(base_ur());
+        } else if ($idPlatillo == null) {
+            $this->session->set_flashdata("error", "El platillo ingresado no es válido.");
+            redirect(base_url("index.php/platillos"));
+        } else {
+            $where['id'] = $idPlatillo;
+            $platillo = $this->PlatillosModelo->buscar($where);
+            $data = array(
+                'titulo' => "Platillos",
+                'metodo' => "actualizar",
+                'platillo' => $platillo
+            );
+            $this->load->view("platillos/formVista", $data);
+        }
+    }
+
+    public function actualizar () {
+        if (!validarAcceso()) {
+            redirect(base_url());
+        } else if (!$this->form_validation($this->input->post("idPlatillo"))) {
+            $this->session->set_flashdata("error", "Corregir los errores de formulario.");
+            redirect(base_url("index.php/platillos/editar/").$this->input->post("idPlatillo"));
+        } else {
             $post = $this->input->post();
-            $answ = array();
-            if ($this->form_validation($post['idPlatillo'])) {
-                $platillo = array(
-                    'nombre' => $post['txtNombre'],
-                    'precio' => $post['txtPrecio']
-                );
-                $where = array("id" => $post['idPlatillo']);
-                if (!$this->PlatillosModelo->actualizar($platillo, $where)) {
-                    $answ['code'] = -1;
-                    $answ['msg'] = "No se pudo actualizar el platillo";
-                }
-                else {
-                    $answ['code'] = 1;
-                    $answ['msg'] = $post['idPlatillo'];
-                    $answ['platillo'] = $this->PlatillosModelo->buscar($post['idPlatillo']);
-                }
+            $platillo = array(
+                'nombre' => $post['txtNombre'],
+                'precio' => $post['txtPrecio']
+            );
+            $where["id"] = $post['idPlatillo'];
+            if (!$this->PlatillosModelo->actualizar($platillo, $where)) {
+                $this->session->set_flashdata("error", "No se pudo actualizar el platillo.");
+            } else {
+                $this->session->set_flashdata("success", "Platillo actualizado.");
             }
-            else {
-                $answ['code'] = 0;
-                $answ['msg'] = $this->get_erorr_message();
-            }
-            echo json_encode($answ);
+            redirect(base_url("index.php/platillos"));
         }
-        else
-            show_404();
-    }
-
-    public function toggle () {
-        if (validarAcceso(true)) {
-            $post = $this->input->post();
-            $where = array("id" => $post["idPlatillo"]);
-            $data = array("status" => $post["status"]);
-            if ($post["status"] == 0 and !$this->hayMasDe(5))
-                $res['code'] = -1;
-            else
-                $res['code'] = (int)$this->PlatillosModelo->actualizar($data, $where);
-            echo json_encode($res);
-        }
-        else
-            show_404();
-    }
-
-    public function data ($id = '') {
-        if (validarAcceso() and $this->input->is_ajax_request()) {
-            if (empty($id))
-                echo json_encode($this->PlatillosModelo->listar());
-            else {
-                $where = array("id" => $id);
-                echo json_encode($this->PlatillosModelo->listar($where));
-            }
-        }
-        else
-            show_404();
     }
 
     private function form_validation ($idPlatillo = 0) {
@@ -140,22 +131,17 @@ class Platillos extends CI_Controller {
         $this->form_validation->set_message("is_unique", "El {field} ingresado ya existe");
         return $this->form_validation->run();
     }
-
-    private function get_erorr_message () {
-        return "txtNombre=".form_error("txtNombre")."&".
-            "txtPrecio=".form_error("txtPrecio");
-    }
     
     private function hayMasDe ($cantidad) {
         $total = $this->PlatillosModelo->totalPlatillos();
         return $total > $cantidad;
     }
 
-    public function buscar ($nombrePlatillo = '') {
-        if (validarAcceso(true)) {            
-            echo json_encode($this->PlatillosModelo->like($nombrePlatillo));
-        }
-        else
-            show_404();
-    }
+    // public function buscar ($nombrePlatillo = '') {
+    //     if (validarAcceso(true)) {            
+    //         echo json_encode($this->PlatillosModelo->like($nombrePlatillo));
+    //     }
+    //     else
+    //         redirect(base_url());
+    // }
 }

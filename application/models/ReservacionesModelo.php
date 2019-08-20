@@ -63,12 +63,10 @@ class ReservacionesModelo extends MY_Model {
 		return false;
 	}
 
-	public function puedoReservar ($reservacion) {
-		$this->db->where("fecha = DATE('".$reservacion['fecha']."')");
-		$this->db->where("hora_inicio = TIME('".$reservacion['hora_inicio']."')");
-		$this->db->where("hora_fin = TIME('".$reservacion['hora_fin']."')");
-		$this->db->where("id_hora", $reservacion['id_hora']);
-		$reser = $this->db->get("listar_reservaciones");
+	public function puedoReservar ($idTipoMesa, $idTipoHora, $fecha) {
+		$reser = $this->db->query("CALL puedoReservar(" .
+			"{$idTipoMesa}, {$idTipoHora}, {$fecha}" .
+		")");
 		return ($reser->num_rows() == 0);
 	}
 
@@ -118,5 +116,20 @@ class ReservacionesModelo extends MY_Model {
 			return $ids;
 		}
 		return false;
+	}
+
+	public function isTipoHora ($idTipoHora) {
+		$this->db->where("tipo", $idTipoHora);
+		$horas = $this->db->get("horas_mesas");
+		return $horas->num_rows() > 0;
+	}
+
+	public function mesasDisponibles ($data) {
+		$cantidad = $this->db->query("CALL mesasDisponibles(" . 
+			"{$data['idMesa']}, TIME('{$data['horaInicio']}', ". 
+			"TIME('{$data['horaFin']}'), DATE('{$data['fecha']}'))"
+		. ")");
+		$cantidad = $cantidad->row_array();
+		return $cantidad['mesas'];
 	}
 }

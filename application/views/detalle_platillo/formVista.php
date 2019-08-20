@@ -40,8 +40,11 @@
 					value="<?php echo $platillo['precio'] * $platillo['cantidad'] ?>">
 			</div>
 		</div>
-		<div class="row pull-right">
-			<div class="col-xs-3">
+		<div class="row">
+			<div class="col-xs-1 col-xs-offset-10">
+				<button type="button" onclick="borrar()" class="btn btn-danger">Borrar</button>
+			</div>
+			<div class="col-xs-1">
 				<button type="submit" class="btn btn-success">Guardar</button>
 			</div>
 		</div>
