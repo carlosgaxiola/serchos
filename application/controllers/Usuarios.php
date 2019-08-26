@@ -155,4 +155,22 @@ class Usuarios extends MY_Controller {
         }
     }
 
+    public function cancelar ($idMesa = null) {
+        if (!validarAcceso(true)) {
+            redirect(base_url());
+        } else if ($idMesa == null) {
+            echo json_encode(array("code" => -1, 
+                "msg" => "El id ingresado no es válido."));
+        } else {
+            $where['id'] = $idMesa;
+            $data['status'] = 0;
+            if ($this->UsuariosModelo->actualizar($data, $where)) {
+                echo json_encode(array("code" => 1, 
+                    "msg" => "Usuario deshabilitado."));
+            } else {
+                echo json_encode(array("code" => 0, 
+                    "msg" => "No se pudo deshabilitar el usuario."));
+            }
+        }
+    }
 }

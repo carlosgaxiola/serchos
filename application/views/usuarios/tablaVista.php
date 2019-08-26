@@ -41,10 +41,18 @@
 								echo "Activo";
 						?></td>
 						<td>
-							<a class="btn btn-warning"
-							href="<?php echo base_url("index.php/usuarios/editar/").$tipo."/".$usuario['id'] ?>">
-								Modificar
-							</a>
+							<?php if ($usuario['status'] != 0): ?>
+								<a class="btn btn-warning btn-sm"
+								href="<?php echo base_url("index.php/usuarios/editar/").$tipo."/".$usuario['id'] ?>">
+									Modificar
+								</a>
+								<button class="btn btn-danger btn-sm"
+									onclick="deshabilitar(
+										<?php echo $usuario['id'] ?>,
+										'<?php echo $usuario['nombre'] ?>')">
+									Deshabilitar
+								</button>
+							<?php endif; ?>
 						</td>
 					</tr>
 				<?php endforeach; ?>
