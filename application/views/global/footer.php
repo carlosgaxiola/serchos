@@ -81,12 +81,17 @@
 		})
 	}
 
-	var success = function (msg = "La operación fue exitosa.", title = "Éxito") {
-		BootstrapDialog.alert({
+	var success = function (msg = "La operación fue exitosa.", title = "Éxito", callback = undefined) {
+		BootstrapDialog.show({
 			title: title,
 			message: msg,
 			type: BootstrapDialog.TYPE_SUCCESS,
-			size: BootstrapDialog.SIZE_SMALL
+			size: BootstrapDialog.SIZE_SMALL,
+			buttons: [{ label: "OK", action: function ( dialog ) { dialog.close(); }}],
+			onhide: function (dialog) {
+				if (callback)
+					callback()
+			}
 		});
 	}
 </script>

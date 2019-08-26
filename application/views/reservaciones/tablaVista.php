@@ -1,20 +1,23 @@
 <div class="row">
-	<div class="col-xs-3">
-		<div class="form-group">
-			<label for="txtFecha">Fecha</label>
-			<input type="text" class="form-control fecha" id="txtFecha" name="txtFecha">
-			<small class="help-block error-box" style="display: none;"></small>
-			<button class="btn btn-primary btn-sm" id="btn-buscar" type="button"
-				style="margin-top: -33px;
-				margin-right: -40px;
-				float: right;">
-				<i class="fas fa-search"></i>
-			</button>
+	<form method="post"
+		action="<?php echo base_url("index.php/reservaciones") ?>">
+		<div class="col-xs-3">
+			<div class="form-group">
+				<label for="txtFecha">Fecha</label>
+				<input type="text" class="form-control fecha" id="txtFecha" name="txtFecha">
+				<small class="help-block error-box" style="display: none;"></small>
+				<button class="btn btn-primary btn-sm" type="submit"
+					style="margin-top: -33px;
+					margin-right: -40px;
+					float: right;">
+					<i class="fas fa-search"></i>
+				</button>
+			</div>
 		</div>
-	</div>
+	</form>
 	<div class="col-xs-1 col-xs-offset-8">
 		<a class="btn btn-success" style="margin-top: 30%;"
-			href="<?php echo base_url("index.php/reservaciones/ver") ?>">
+			href="<?php echo base_url("index.php/reservaciones/nueva") ?>">
 			Nueva
 		</a>
 	</div>
@@ -55,10 +58,16 @@
 						<td><?php echo $res['hora_inicio'] . " - " . $res['hora_fin'] ?></td>
 						<td><?php echo $estado ?></td>
 						<td>
-							<a class="btn btn-warning"
-							href="<?php echo base_url("index.php/reservaciones/ver/").$res['id'] ?>">
-								Editar
-							</a>
+							<?php if ($res['status'] != 0): ?>
+								<a class="btn btn-warning btn-sm"
+								href="<?php echo base_url("index.php/reservaciones/editar/").$res['id'] ?>">
+									Editar
+								</a>
+								<button type="button" class="btn btn-danger btn-sm"
+									onclick="cancelar(<?php echo $res['id'] ?>)">
+									Cancelar
+								</button>
+							<?php endif; ?>
 						</td>
 					</tr>
 				<?php endforeach; ?>

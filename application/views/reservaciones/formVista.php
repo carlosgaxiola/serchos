@@ -10,7 +10,7 @@
 			</div>
 		</div>
 		<div class="clear">&nbsp;</div>
-		<form method="post" id="frm-reservacion"
+		<form method="post" id="frm-reservacion" name="frmReservacion"
 			action="<?php echo base_url("index.php/reservaciones/").$metodo ?>">
 			<?php 
 				$idPerfil = $this->session->serchos['idPerfil'];
@@ -20,6 +20,8 @@
 				$isCliente = $this->session->serchos['idPerfil'] != getIdPerfil("Cliente");
 			?>
 			<?php if ($idPerfil != false): ?>
+				<div id="msg-box" class="alert alert-danger" hidden>
+				</div>
 				<div class="row">
 					<?php if ($isCliente): ?>
 						<!-- cmbCliente -->
@@ -105,7 +107,7 @@
 					<!-- txtHoraInicio -->
 					<div class="form-group col-xs-2 
 						<?php echo form_error("txtHoraInicio")? 'has-error' : '' ?>">
-						<label for="txtHoraInicio">Hora</label>
+						<label for="txtHoraInicio">Hora Inicio</label>
 						<?php 
 							$horaInicio = $reservacion != false? $reservacion['hora_inicio'] : '08:00:00';
 							if (set_value("txtHoraInicio"))
@@ -123,7 +125,7 @@
 					<!-- txtHoraFin -->
 					<div class="form-group col-xs-2 
 						<?php echo form_error("txtHoraFin")? 'has-error' : '' ?>">
-						<label for="txtHoraFin">Hora</label>
+						<label for="txtHoraFin">Hora Fin</label>
 						<?php 
 							$horaFin = $reservacion != false? $reservacion['hora_fin'] : '09:00:00';
 							if (set_value("txtHoraFin"))
@@ -182,7 +184,7 @@
 							$text = "Reservar";
 						}
 					?>
-					<button type="submit" class="btn <?php echo $class ?>" disabled="true">
+					<button id="btn-reservar" type="button" onclick="reservar()" class="btn <?php echo $class ?>" disabled="true">
 						<?php echo $text ?>
 					</button>
 				</div>
