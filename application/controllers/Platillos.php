@@ -137,11 +137,20 @@ class Platillos extends CI_Controller {
         return $total > $cantidad;
     }
 
-    // public function buscar ($nombrePlatillo = '') {
-    //     if (validarAcceso(true)) {            
-    //         echo json_encode($this->PlatillosModelo->like($nombrePlatillo));
-    //     }
-    //     else
-    //         redirect(base_url());
-    // }
+   public function cancelar ($idPlatillo = null) {
+        if (!validarAcceso(true)) {
+            redirect(base_url());
+        } else if ($idPlatillo == null) {
+            echo json_encode(array("code" => -1, "msg" => "El id ingresado no es válido."));
+        } else {
+            $where['id'] = $idPlatillo;
+            $data['status'] = 0;
+            if ($this->PlatillosModelo->actualizar($data, $where)) {
+                echo json_encode(array("code" => 1, "msg" => "Platillo deshabilitado."));
+            } else {
+                echo json_encode(array("code" => 0, 
+                    "msg" => "No se pudo deshabilitar el platillo."));
+            }
+        }
+    }
 }

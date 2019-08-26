@@ -5,5 +5,39 @@
 		<?php elseif ($this->session->flashdata("error")): ?>
 			errorDialog('<?php echo $this->session->flashdata("error") ?>');
 		<?php endif; ?>
-	})
+	});
+
+	var deshabilitar = function (idMesa, nombre) {
+		BootstrapDialog.confirm({
+			title: "Confirmar",
+			message: "El platillo " + nombre + " será deshabilitadp.<br>" +
+				"¿Desea continuar?",
+			btnOKClass: "btn-danger",
+			btnOKLabel: "Sí",
+			btnCancelLabel: "No",
+			type: BootstrapDialog.TYPE_DANGER,
+			size: BootstrapDialog.SIZE_SMALL,
+			callback: function ( ok ) {
+				if ( ok ) {
+					$.ajax({
+						url: base_url + "platillos/cancelar/" + idMesa,
+						success: function ( answ ) {
+							try {
+								answ = JSON.parse(answ);
+								if (answ.code != 1) {
+									errorDialog(answ.msg);
+								} else {
+									success(answ.msg, "Deshabilitado", function () {
+										location.reload();
+									})
+								}
+							} catch ( e ) {
+								console.error(e)
+							}
+						}
+					});
+				}
+			}
+		});
+	}
 </script>

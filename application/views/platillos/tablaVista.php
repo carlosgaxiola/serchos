@@ -27,10 +27,18 @@
 								echo "Inactivo";
 						?></td>
 						<td>
-							<a class="btn btn-warning" 
-								href="<?php echo base_url("index.php/platillos/editar/").$platillo['id'] ?>">
-								Modificar
-							</a>
+							<?php if ($platillo['status'] == 1): ?>
+								<a class="btn btn-warning btn-sm" 
+									href="<?php echo base_url("index.php/platillos/editar/").$platillo['id'] ?>">
+									Modificar
+								</a>
+								<button type="button" class="btn btn-danger btn-sm"
+									onclick="deshabilitar(
+										<?php echo $platillo['id'] ?>,
+										'<?php echo $platillo['nombre'] ?>')">
+									Deshabilitar
+								</button>
+							<?php endif; ?>
 						</td>
 					</tr>
 				<?php endforeach; ?>

@@ -49,7 +49,8 @@ class Reportes extends MY_Controller {
 				'comandas' => $this->ReportesModelo->comandas($fechaInicio, $fechaFin)
 			);
 			$this->load->view("reportes/comandas/mainVista", $data);
-		} else redirect(base_url());
+		} 
+		else redirect(base_url());
 	}
 
 	public function caja () {

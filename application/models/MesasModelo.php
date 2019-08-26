@@ -9,18 +9,12 @@ class MesasModelo extends MY_Model {
 		$this->view = "mesas";
 	}
 
-	public function totalMesas ($tipo = 0) {
-		if ($tipo != 0)
-			$this->db->where("tipo_mesa", $tipo);
-		$this->db->where("status > ", 0);
-		$this->db->select("COUNT(*) AS total");
+	public function totalMesas ($idMesa) {
+		$this->db->where("id", $idMesa);
+		$this->db->where("status", 1);
 		$res = $this->db->get($this->view);
 		if ($res->num_rows())
-			return $res->row()->total;
+			return $res->row()->cantidad;
 		return false;
-	}
-
-	public function llenarHorarios ($idMesa) {
-		$this->db->query("CALL llenar_horarios_mesa('".$idMesa."')");
 	}
 }	
